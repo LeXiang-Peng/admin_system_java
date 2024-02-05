@@ -22,7 +22,7 @@ public class CodeGenerator {
     private static void Generator(){
         //user.dir	用户当前工作目录
         String projectPath = System.getProperty("user.dir");
-        FastAutoGenerator.create("jdbc:mysql://localhost:3306/test?serverTimezone=GMT%2b8&characterEncoding=utf-8&useSSL=false", "root", "123456")
+        FastAutoGenerator.create("jdbc:mysql://localhost:3306/admin_system?serverTimezone=GMT%2b8&characterEncoding=utf-8&useSSL=false", "root", "123456")
                 .globalConfig(builder -> {
                     builder.author("plx") // 设置作者
                             .enableSwagger() // 开启 swagger 模式
@@ -44,7 +44,7 @@ public class CodeGenerator {
                             .pathInfo(Collections.singletonMap(OutputFile.xml, projectPath+"\\src\\main\\resources\\mapper")); // 设置mapperXml生成路径
                 })
                 .strategyConfig(builder -> {
-                    builder.addInclude("user")// 设置需要生成的表名
+                    builder.addInclude("admin_menu")// 设置需要生成的表名
                             .addTablePrefix("t_", "c_") // 设置过滤表前缀
                             .controllerBuilder().enableHyphenStyle() //设置驼峰命名
                             .entityBuilder().enableLombok().enableFileOverride()  //entity 包开启 lombok 和覆盖
