@@ -16,17 +16,13 @@ import java.util.List;
  */
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class MenuList {
     private String menuName;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String menuIcon;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<MenuList> menuChildren;
     //Constructor
     public MenuList(Menu menuView){
         this.menuName = menuView.getMenuName();
-        this.menuIcon = menuView.getMenuIcon();
         this.menuChildren= new ArrayList<>();
     }
 }

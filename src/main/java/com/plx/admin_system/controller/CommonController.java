@@ -1,17 +1,15 @@
 package com.plx.admin_system.controller;
 
+import com.plx.admin_system.entity.dto.ResponseResult;
+import com.plx.admin_system.entity.dto.UserDto;
 import com.plx.admin_system.service.CommonService;
 import com.plx.admin_system.utils.pojo.MenuList;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -45,13 +43,24 @@ public class CommonController {
         }
     }
 
-    @GetMapping("/login/{code}")
-    public Boolean login(@PathVariable String code){
-        return commonService.verifyCaptcha(code);
+    @PostMapping("/login")
+    public ResponseResult login(@RequestBody UserDto user){
+        if(!commonService.verifyCaptcha(user.getCode())){
+            return new ResponseResult(403,"验证码错误");
+        }else{
+
+        }
+        return null;
     }
 
-    @GetMapping("/getMenu")
-    public List<MenuList> getMenu(){
-        return commonService.getAdminMenuView();
+    @GetMapping("/getMenu/{role}")
+    public List<MenuList> getMenu(@PathVariable String role){
+        switch (role) {
+            case "admin" : return commonService.getAdminMenu();
+            case "superadmin" : return commonService.getSuperAdminMenu();
+            case "student" : return commonService.getStudentMenu();
+            case "teacher" : return commonService.getTeacherMenu();
+            default: return null;
+        }
     }
 }

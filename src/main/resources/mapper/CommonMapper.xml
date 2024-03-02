@@ -1,13 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.plx.admin_system.mapper.CommonMapper">
-    <resultMap id="menuMao" type="com.plx.admin_system.entity.views.Menu">
+    <resultMap id="menuMap" type="com.plx.admin_system.entity.views.Menu">
         <result column="menu_id" property="menuId"></result>
         <result column="menu_name" property="menuName"></result>
-        <result column="menu_icon" property="menuIcon"></result>
         <result column="parent_menu_id" property="parentMenuId"></result>
     </resultMap>
-    <select id="getAdminMenuView" resultMap="menuMao">
-        select * from admin_menu;
+    <select id="getAdminMenuView" resultMap="menuMap">
+        select * from admin_menu
+    </select>
+    <select id="getSuperAdminMenuView" resultMap="menuMap">
+        select * from superadmin_menu
+    </select>
+    <select id="getStudentMenuView" resultMap="menuMap">
+        select * from student_menu
+    </select>
+    <select id="getTeacherMenuView" resultMap="menuMap">
+        select * from teacher_menu
+    </select>
+    <select id="getOneStudentById" resultType="com.plx.admin_system.entity.Student">
+        select * from student where student_id = #{id}
+    </select>
+    <select id="getOneAdminById" resultType="com.plx.admin_system.entity.Admin">
+        select * from admin where admin_id = #{id}
+    </select>
+    <select id="getOneTeacherById" resultType="com.plx.admin_system.entity.Teacher">
+        select * from teacher where teacher_id = #{id}
     </select>
 </mapper>

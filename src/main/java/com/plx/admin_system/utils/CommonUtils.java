@@ -5,7 +5,6 @@ import cn.hutool.captcha.generator.RandomGenerator;
 import com.plx.admin_system.entity.views.Menu;
 import com.plx.admin_system.utils.pojo.Captcha;
 import com.plx.admin_system.utils.pojo.MenuList;
-import io.swagger.models.auth.In;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author plx

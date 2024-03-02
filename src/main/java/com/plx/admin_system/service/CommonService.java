@@ -10,5 +10,8 @@ public interface CommonService {
     void reshapeToRandomGenerator();
     void reshapeToMathGenerator();
     Boolean verifyCaptcha(String code);
-    List<MenuList> getAdminMenuView();
+    List<MenuList> getAdminMenu();
+    List<MenuList> getSuperAdminMenu();
+    List<MenuList> getStudentMenu();
+    List<MenuList> getTeacherMenu();
 }
