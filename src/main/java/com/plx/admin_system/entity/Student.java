@@ -2,6 +2,7 @@ package com.plx.admin_system.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +34,7 @@ public class Student extends User {
     private Integer professionId;
 
     private Integer identificationNumber;
-
+    @JsonIgnore
     private String studentPassword;
 
     private String studentPhoneNumber;
@@ -50,4 +51,8 @@ public class Student extends User {
         this.studentPassword = studentPassword;
     }
 
+//    public void setStudentName(String studentName) {
+//        super.setUserName(studentName);
+//        this.studentName = studentName;
+//    }
 }

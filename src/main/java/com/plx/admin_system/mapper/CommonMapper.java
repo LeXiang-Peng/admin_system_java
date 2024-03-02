@@ -21,7 +21,7 @@ public interface CommonMapper {
     HashMap<Integer,Menu> getStudentMenuView();
     @MapKey("menuId")
     HashMap<Integer,Menu> getTeacherMenuView();
-
+    //交由SpringSecurity框架校验
     Student getOneStudentById(@Param("id") Integer id);
     Admin getOneAdminById(@Param("id") Integer id);
     Teacher getOneTeacherById(@Param("id") Integer id);

@@ -1,10 +1,12 @@
-package com.plx.admin_system.securityFramework;
+package com.plx.admin_system.security.password;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.security.auth.Subject;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author plx
@@ -23,11 +25,9 @@ public class UserAuthenticationToken extends AbstractAuthenticationToken {
         setAuthenticated(false);
     }
 
-    public UserAuthenticationToken(Object principal, Object credentials, String identity, Collection<? extends GrantedAuthority> authorities) {
+    public UserAuthenticationToken(Object principal, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;
-        this.credentials = credentials;
-        this.identity = identity;
         setAuthenticated(true);
     }
 

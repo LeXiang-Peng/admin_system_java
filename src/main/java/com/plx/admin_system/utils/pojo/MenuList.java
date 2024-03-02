@@ -16,9 +16,12 @@ import java.util.List;
  */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class MenuList {
     private String menuName;
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String menuIcon;
     private List<MenuList> menuChildren;
     //Constructor
     public MenuList(Menu menuView){

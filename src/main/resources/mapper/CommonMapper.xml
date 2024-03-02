@@ -19,12 +19,12 @@
         select * from teacher_menu
     </select>
     <select id="getOneStudentById" resultType="com.plx.admin_system.entity.Student">
-        select * from student where student_id = #{id}
+        select student_id, student_password from student where student_id = #{id}
     </select>
     <select id="getOneAdminById" resultType="com.plx.admin_system.entity.Admin">
-        select * from admin where admin_id = #{id}
+        select admin_id, admin_password from admin where admin_id = #{id}
     </select>
     <select id="getOneTeacherById" resultType="com.plx.admin_system.entity.Teacher">
-        select * from teacher where teacher_id = #{id}
+        select teacher_id, teacher_password from teacher where teacher_id = #{id}
     </select>
 </mapper>
