@@ -15,7 +15,8 @@ import java.util.concurrent.TimeUnit;
  */
 @SuppressWarnings(value = { "unchecked", "rawtypes" })
 @Component
-public class RedisCache {
+public class RedisCache
+{
     @Resource
     public RedisTemplate redisTemplate;
 
@@ -238,4 +239,6 @@ public class RedisCache {
         return redisTemplate.keys(pattern);
     }
 }
+
+
 

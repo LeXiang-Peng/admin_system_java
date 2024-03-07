@@ -1,19 +1,18 @@
 package com.plx.admin_system.security.password;
 
+import com.plx.admin_system.entity.Admin;
+import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.service.UserDetailsService;
+import com.plx.admin_system.utils.CommonUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -33,13 +32,11 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         Integer userId = (Integer) token.getPrincipal();
         String password = (String) token.getCredentials();
         String role = token.getIdentity();
-        UserDetails user = userDetailsService.loadUserByUseridAndRole(userId, role);
+        MyUserDetails user = userDetailsService.loadUserByUseridAndRole(userId, role);
         if (Objects.isNull(user) || !passwordEncoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("用户ID或密码错误!");
         }
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(role));
-        return new UserAuthenticationToken(user, authorities);
+        return new UserAuthenticationToken(user, user.getAuthorities());
     }
 
     @Override

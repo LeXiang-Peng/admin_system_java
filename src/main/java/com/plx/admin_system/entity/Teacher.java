@@ -47,8 +47,4 @@ public class Teacher extends User {
         this.teacherPassword = teacherPassword;
     }
 
-//    public void setTeacherName(String teacherName) {
-//        super.setUserName(teacherName);
-//        this.teacherName = teacherName;
-//    }
 }

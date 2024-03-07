@@ -1,23 +1,30 @@
 package com.plx.admin_system.config;
 
-import com.plx.admin_system.utils.FastJsonRedisSerializer;
+import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+/**
+ * redis配置
+ */
 @Configuration
-public class RedisConfig {
-
+@EnableCaching
+public class RedisConfig extends CachingConfigurerSupport
+{
     @Bean
     @SuppressWarnings(value = { "unchecked", "rawtypes" })
-    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory)
+    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory)
     {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
+        template.setConnectionFactory(redisConnectionFactory);
 
-        FastJsonRedisSerializer serializer = new FastJsonRedisSerializer(Object.class);
+        String[] acceptNames = {"org.springframework.security.core.authority.SimpleGrantedAuthority"};
+        GenericFastJsonRedisSerializer serializer = new GenericFastJsonRedisSerializer(acceptNames);
 
         // 使用StringRedisSerializer来序列化和反序列化redis的key值
         template.setKeySerializer(new StringRedisSerializer());
@@ -30,5 +37,5 @@ public class RedisConfig {
         template.afterPropertiesSet();
         return template;
     }
-}
 
+}

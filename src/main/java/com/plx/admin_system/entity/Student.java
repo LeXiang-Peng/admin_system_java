@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author plx
@@ -51,8 +51,4 @@ public class Student extends User {
         this.studentPassword = studentPassword;
     }
 
-//    public void setStudentName(String studentName) {
-//        super.setUserName(studentName);
-//        this.studentName = studentName;
-//    }
 }

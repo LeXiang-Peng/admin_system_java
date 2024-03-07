@@ -1,6 +1,7 @@
  package com.plx.admin_system.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.List;
@@ -38,6 +39,7 @@ public class AdminController {
         return adminService.removeById(id);
     }
     @GetMapping("/queryOne/{id}")
+    @PreAuthorize("hasAuthority('admin+')")
     public Admin queryOne(@PathVariable Integer id) {
         return adminService.getById(id);
     }

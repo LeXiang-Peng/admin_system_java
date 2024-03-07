@@ -6,6 +6,7 @@ import com.plx.admin_system.utils.CommonUtils;
 import com.plx.admin_system.utils.JwtUtil;
 import com.plx.admin_system.utils.RedisCache;
 import io.jsonwebtoken.Claims;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -17,6 +18,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -51,8 +54,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             throw new RuntimeException("用户未登录");
         }
         //存入SecurityContextHolder
-        //TODO 获取权限信息
-        UserAuthenticationToken userAuthenticationToken = new UserAuthenticationToken(loginUser, null);
+        //获取权限信息
+        UserAuthenticationToken userAuthenticationToken = new UserAuthenticationToken(loginUser, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(userAuthenticationToken);
         filterChain.doFilter(request, response);
     }

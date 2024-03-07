@@ -99,12 +99,6 @@
             <artifactId>junit</artifactId>
             <version>4.12</version>
         </dependency>
-        <!--fastjson-->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.70</version>
-        </dependency>
         <!--Security框架-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -119,7 +113,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.33</version>
+            <version>2.0.22</version>
         </dependency>
         <!--jwt依赖-->
         <dependency>

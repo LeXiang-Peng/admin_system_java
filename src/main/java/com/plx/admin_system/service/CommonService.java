@@ -21,4 +21,6 @@ public interface CommonService {
     List<MenuList> getTeacherMenu();
 
     ResponseResult login(UserDto user);
+
+    ResponseResult logout();
 }

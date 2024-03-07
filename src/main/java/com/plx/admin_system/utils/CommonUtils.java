@@ -17,6 +17,10 @@ import java.util.List;
 public class CommonUtils {
     private static final String PREFIX = "login:";
     public static final String HEADER_KEY = "token";
+    public static final String IDENTITY_STUDENT = "student";
+    public static final String IDENTITY_TEACHER = "teacher";
+    public static final String IDENTITY_ADMIN = "admin";
+    public static final String IDENTITY_SUPER_ADMIN = "admin+";
 
     public static String getRedisUserKey(String userId) {
         return PREFIX.concat(userId);

@@ -16,6 +16,7 @@ import com.plx.admin_system.utils.pojo.MenuList;
 import io.swagger.models.auth.In;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -45,7 +46,7 @@ public class CommonServiceImpl implements CommonService {
     /**
      * 基于LRU策略的缓存，即 最近最少使用
      */
-    ConcurrentLinkedHashMap<String, Object> map = new ConcurrentLinkedHashMap.Builder<String, Object>()
+    private ConcurrentLinkedHashMap<String, Object> map = new ConcurrentLinkedHashMap.Builder<String, Object>()
             .maximumWeightedCapacity(MAP_COUNT)
             .weigher(Weighers.singleton())
             .build();
@@ -103,7 +104,7 @@ public class CommonServiceImpl implements CommonService {
         } else {
             //认证成功，生成jwt，返回ResponseResult对象
             MyUserDetails loginUser = (MyUserDetails) authenticate.getPrincipal();
-            String userId = loginUser.getUserId().toString();
+            String userId = String.valueOf(loginUser.getUserId());
             String jwt = JwtUtil.createJWT(userId);
             Map<String, String> map = new HashMap();
             map.put("token", jwt);
@@ -111,6 +112,17 @@ public class CommonServiceImpl implements CommonService {
             redisCache.setCacheObject(CommonUtils.getRedisUserKey(userId), loginUser);
             return new ResponseResult(200, "登录成功", map);
         }
+    }
+
+    @Override
+    public ResponseResult logout() {
+        //从SecurityContextHolder中获取userId
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) authentication.getPrincipal();
+        String userId = String.valueOf(loginUser.getUserId());
+        //删除Redis删除userId
+        redisCache.deleteObject(CommonUtils.getRedisUserKey(userId));
+        return new ResponseResult(200, "登出成功");
     }
 
 }

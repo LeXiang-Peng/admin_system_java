@@ -1,13 +1,20 @@
 package com.plx.admin_system.entity.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.plx.admin_system.entity.User;
+import com.plx.admin_system.utils.CustomAuthorityDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author plx
@@ -17,13 +24,30 @@ import java.util.Collection;
 @NoArgsConstructor
 public class MyUserDetails implements UserDetails {
     private User user;
+    private String role;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+    @JSONField(serialize = false)
+    private List<SimpleGrantedAuthority> permission;
+
+    public MyUserDetails(User user, String role) {
+        this.user = user;
+        this.role = role;
     }
 
-    public Integer getUserId(){
+    @Override
+    @JsonDeserialize(using = CustomAuthorityDeserializer.class)
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (Objects.nonNull(permission)) {
+            return permission;
+        }
+        permission = new ArrayList<>();
+        if(Objects.nonNull(role)) {
+            permission.add(new SimpleGrantedAuthority(role));
+        }
+        return permission;
+    }
+
+    public Integer getUserId() {
         return user.getUserId();
     }
 
