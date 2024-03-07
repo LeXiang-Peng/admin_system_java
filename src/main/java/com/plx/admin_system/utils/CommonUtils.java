@@ -18,9 +18,10 @@ public class CommonUtils {
     private static final String PREFIX = "login:";
     public static final String HEADER_KEY = "token";
 
-    public static String getRedisKey(String userId) {
+    public static String getRedisUserKey(String userId) {
         return PREFIX.concat(userId);
     }
+
 
     //生成菜单
     public List<MenuList> generateMenu(HashMap<Integer, Menu> menuView) {

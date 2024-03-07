@@ -17,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/common")
 public class CommonController {
+
     @Resource
     CommonService commonService;
 

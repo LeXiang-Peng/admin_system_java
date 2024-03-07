@@ -45,7 +45,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             throw new RuntimeException("token异常");
         }
         //从redis中获取用户信息
-        String redisKey = CommonUtils.getRedisKey(userId);
+        String redisKey = CommonUtils.getRedisUserKey(userId);
         MyUserDetails loginUser = redisCache.getCacheObject(redisKey);
         if (Objects.isNull(loginUser)) {
             throw new RuntimeException("用户未登录");

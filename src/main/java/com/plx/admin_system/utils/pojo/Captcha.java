@@ -9,6 +9,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
@@ -24,21 +25,20 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 @Getter
 @Setter
-public class Captcha extends AbstractCaptcha implements Serializable {
+@Component
+public class Captcha extends AbstractCaptcha {
     private static final Integer WIDTH = 200;
     private static final Integer HEIGHT = 100;
     private static final Integer COUNT = 4;
     private static final Integer LINECOUNT = 50;
     private Integer visits;
     private boolean isUsed;
-    private long createTime;
 
     public Captcha() {
         super(WIDTH, HEIGHT, COUNT, LINECOUNT);
         this.reshapeToMathGenerator();
         this.visits = 0;
         this.isUsed = false;
-        this.createTime = System.currentTimeMillis();
     }
 
     @Override
@@ -102,7 +102,4 @@ public class Captcha extends AbstractCaptcha implements Serializable {
         GraphicsUtil.drawStringColourful(g, code, this.font, this.width, this.height);
     }
 
-    public double getTTL() {
-        return (double) (System.currentTimeMillis() - this.createTime) / 1000 / 60;
-    }
 }

@@ -1,5 +1,7 @@
 package com.plx.admin_system.service.impl;
 
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.dto.UserDto;
@@ -11,6 +13,7 @@ import com.plx.admin_system.utils.JwtUtil;
 import com.plx.admin_system.utils.RedisCache;
 import com.plx.admin_system.utils.pojo.Captcha;
 import com.plx.admin_system.utils.pojo.MenuList;
+import io.swagger.models.auth.In;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -36,29 +39,29 @@ public class CommonServiceImpl implements CommonService {
     @Resource
     private RedisCache redisCache;
 
-    private Map<String, Object> map = new HashMap<>();
-    private static final Integer TIMES = 10;
-    //map最大数量
-    private static final Integer CURRENT_COUNT = 50;
-    // 验证码过期时间 5min
-    private static final double EXPIRED_TIME = 5;
+    private static final Integer MAP_COUNT = 100;
+    private static final Integer VISISTS_TIMES = 10;
+
+    /**
+     * 基于LRU策略的缓存，即 最近最少使用
+     */
+    ConcurrentLinkedHashMap<String, Object> map = new ConcurrentLinkedHashMap.Builder<String, Object>()
+            .maximumWeightedCapacity(MAP_COUNT)
+            .weigher(Weighers.singleton())
+            .build();
 
     @Override
     public void createCaptchaImage(HttpServletResponse response, String sessionId) {
         Captcha captcha = (Captcha) map.get(sessionId);
         if (Objects.isNull(captcha)) {
-            //是否过期
-            new Thread(()->{
-                this.isExpired();
-            }).start();
             captcha = new Captcha();
         }
-        Integer times = captcha.getVisits();
-        if (Objects.equals(times, TIMES)) {
+        Integer visits = captcha.getVisits();
+        if (Objects.equals(visits, VISISTS_TIMES)) {
             captcha.reshapeToRandomGenerator();
         }
-        if (times <= TIMES) {
-            captcha.setVisits(times + 1);
+        if (visits <= VISISTS_TIMES) {
+            captcha.setVisits(visits + 1);
             map.put(sessionId, captcha);
         }
         captcha.createCaptchaImage(response);
@@ -105,20 +108,9 @@ public class CommonServiceImpl implements CommonService {
             Map<String, String> map = new HashMap();
             map.put("token", jwt);
             //把完整的用户信息存入redis, userId 作为key
-            redisCache.setCacheObject(CommonUtils.getRedisKey(userId), loginUser);
+            redisCache.setCacheObject(CommonUtils.getRedisUserKey(userId), loginUser);
             return new ResponseResult(200, "登录成功", map);
         }
     }
 
-    private synchronized void isExpired() {
-        if (map.size() >= CURRENT_COUNT) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                String key = entry.getKey();
-                Captcha captcha = (Captcha) entry.getValue();
-                if (captcha.getTTL() >= EXPIRED_TIME) {
-                    map.remove(key);
-                }
-            }
-        }
-    }
 }
