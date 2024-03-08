@@ -26,14 +26,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         switch (role) {
             case "student":
                 user = commonMapper.getOneStudentById(userId);
-                return Objects.isNull(user) ? null : new MyUserDetails(user, role);
+                return Objects.isNull(user) ? null : new MyUserDetails(user, CommonUtils.IDENTITY_STUDENT);
             case "teacher":
                 user = commonMapper.getOneTeacherById(userId);
-                return Objects.isNull(user) ? null : new MyUserDetails(user, role);
+                return Objects.isNull(user) ? null : new MyUserDetails(user, CommonUtils.IDENTITY_TEACHER);
             case "admin":
                 Admin admin = commonMapper.getOneAdminById(userId);
                 return Objects.isNull(admin) ? null : admin.getAdminType() == 1 ?
-                        new MyUserDetails(admin, CommonUtils.IDENTITY_SUPER_ADMIN) : new MyUserDetails(admin, role);
+                        new MyUserDetails(admin, CommonUtils.IDENTITY_SUPER_ADMIN) : new MyUserDetails(admin, CommonUtils.IDENTITY_ADMIN);
             default:
                 return null;
         }
