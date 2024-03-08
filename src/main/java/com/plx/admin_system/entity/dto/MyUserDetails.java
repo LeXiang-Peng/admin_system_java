@@ -1,9 +1,7 @@
 package com.plx.admin_system.entity.dto;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.plx.admin_system.entity.User;
-import com.plx.admin_system.utils.CustomAuthorityDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,7 +25,7 @@ public class MyUserDetails implements UserDetails {
     private String role;
 
     @JSONField(serialize = false)
-    private List<SimpleGrantedAuthority> permission;
+    private List<SimpleGrantedAuthority> authorities;
 
     public MyUserDetails(User user, String role) {
         this.user = user;
@@ -35,16 +33,15 @@ public class MyUserDetails implements UserDetails {
     }
 
     @Override
-    @JsonDeserialize(using = CustomAuthorityDeserializer.class)
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (Objects.nonNull(permission)) {
-            return permission;
+        if (Objects.nonNull(authorities)) {
+            return authorities;
         }
-        permission = new ArrayList<>();
+        authorities = new ArrayList<>();
         if(Objects.nonNull(role)) {
-            permission.add(new SimpleGrantedAuthority(role));
+            authorities.add(new SimpleGrantedAuthority(role));
         }
-        return permission;
+        return authorities;
     }
 
     public Integer getUserId() {

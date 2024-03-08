@@ -1,6 +1,6 @@
 package com.plx.admin_system.config;
 
-import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
+import com.plx.admin_system.utils.FastJson2JsonRedisSerializer;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -23,8 +23,7 @@ public class RedisConfig extends CachingConfigurerSupport
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
 
-        String[] acceptNames = {"org.springframework.security.core.authority.SimpleGrantedAuthority"};
-        GenericFastJsonRedisSerializer serializer = new GenericFastJsonRedisSerializer(acceptNames);
+        FastJson2JsonRedisSerializer serializer = new FastJson2JsonRedisSerializer(Object.class);
 
         // 使用StringRedisSerializer来序列化和反序列化redis的key值
         template.setKeySerializer(new StringRedisSerializer());
