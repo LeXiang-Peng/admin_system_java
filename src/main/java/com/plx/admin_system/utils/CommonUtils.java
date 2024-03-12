@@ -1,8 +1,10 @@
 package com.plx.admin_system.utils;
 
 
+import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.entity.views.Menu;
 import com.plx.admin_system.utils.pojo.MenuList;
+import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -16,19 +18,27 @@ import java.util.List;
 @Component
 public class CommonUtils {
     private static final String PREFIX = "login:";
-    public static final String HEADER_KEY = "token";
+    public static final String HEADER_TOKEN_KEY = "token";
     public static final String IDENTITY_STUDENT = "student";
     public static final String IDENTITY_TEACHER = "teacher";
     public static final String IDENTITY_ADMIN = "admin";
     public static final String IDENTITY_SUPER_ADMIN = "admin+";
 
     public static String getRedisUserKey(String userId) {
-        return PREFIX.concat(userId);
+        return PREFIX + userId;
     }
 
+    public static String parseJWT(String token) {
+        try {
+            Claims claims = JwtUtil.parseJWT(token);
+            return getRedisUserKey(claims.getSubject());
+        } catch (Exception e) {
+            throw new RuntimeException("token非法");
+        }
+    }
 
-    //生成菜单
-    public List<MenuList> generateMenu(HashMap<Integer, Menu> menuView) {
+    //生成多级菜单
+    public static List<MenuList> generateMenu(HashMap<Integer, Menu> menuView) {
         //将List索引和ParentMenuId建立hash映射
         HashMap<Integer, Integer> index = new HashMap<>();
         List<MenuList> menuListArrayUtil = new ArrayList<>();

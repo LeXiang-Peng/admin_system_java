@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author plx
@@ -22,14 +23,14 @@ import java.util.Objects;
 @NoArgsConstructor
 public class MyUserDetails implements UserDetails {
     private User user;
-    private String role;
+    private List<String> permission;
 
     @JSONField(serialize = false)
     private List<SimpleGrantedAuthority> authorities;
 
-    public MyUserDetails(User user, String role) {
+    public MyUserDetails(User user, List permission) {
         this.user = user;
-        this.role = role;
+        this.permission = permission;
     }
 
     @Override
@@ -37,10 +38,9 @@ public class MyUserDetails implements UserDetails {
         if (Objects.nonNull(authorities)) {
             return authorities;
         }
-        authorities = new ArrayList<>();
-        if(Objects.nonNull(role)) {
-            authorities.add(new SimpleGrantedAuthority(role));
-        }
+        authorities = permission.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
         return authorities;
     }
 

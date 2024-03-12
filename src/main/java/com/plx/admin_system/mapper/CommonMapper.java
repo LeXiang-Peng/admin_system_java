@@ -13,16 +13,23 @@ import java.util.HashMap;
  * @author plx
  */
 public interface CommonMapper {
-    @MapKey("menuId")
-    HashMap<Integer,Menu> getAdminMenuView();
-    @MapKey("menuId")
-    HashMap<Integer,Menu> getSuperAdminMenuView();
-    @MapKey("menuId")
-    HashMap<Integer,Menu> getStudentMenuView();
-    @MapKey("menuId")
-    HashMap<Integer,Menu> getTeacherMenuView();
+
     //交由SpringSecurity框架校验
     Student getOneStudentById(@Param("id") Integer id);
     Admin getOneAdminById(@Param("id") Integer id);
     Teacher getOneTeacherById(@Param("id") Integer id);
+    /**
+     * get student menu 从数据库拿到学生菜单
+     * @return HashMap
+     */
+    @MapKey("menuId")
+    HashMap<Integer, Menu> getStudentMenu();
+    @MapKey("menuId")
+    HashMap<Integer, Menu> getTeacherAdminMenu();
+    @MapKey("menuId")
+    HashMap<Integer, Menu> getTeacherMenu();
+    @MapKey("menuId")
+    HashMap<Integer, Menu> getSuperAdminMenu();
+    @MapKey("menuId")
+    HashMap<Integer, Menu> getAdminMenu();
 }

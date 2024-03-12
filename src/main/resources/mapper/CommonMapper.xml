@@ -6,18 +6,8 @@
         <result column="menu_name" property="menuName"></result>
         <result column="parent_menu_id" property="parentMenuId"></result>
     </resultMap>
-    <select id="getAdminMenuView" resultMap="menuMap">
-        select * from admin_menu
-    </select>
-    <select id="getSuperAdminMenuView" resultMap="menuMap">
-        select * from superadmin_menu
-    </select>
-    <select id="getStudentMenuView" resultMap="menuMap">
-        select * from student_menu
-    </select>
-    <select id="getTeacherMenuView" resultMap="menuMap">
-        select * from teacher_menu
-    </select>
+
+
     <select id="getOneStudentById" resultType="com.plx.admin_system.entity.Student">
         select student_id, student_password from student where student_id = #{id}
     </select>
@@ -26,5 +16,20 @@
     </select>
     <select id="getOneTeacherById" resultType="com.plx.admin_system.entity.Teacher">
         select teacher_id, teacher_password from teacher where teacher_id = #{id}
+    </select>
+    <select id="getStudentMenu" resultMap="menuMap">
+        select * from student_menu;
+    </select>
+    <select id="getTeacherAdminMenu" resultMap="menuMap">
+        select * from teacher_admin_menu;
+    </select>
+    <select id="getTeacherMenu" resultMap="menuMap">
+        select * from teacher_menu;
+    </select>
+    <select id="getSuperAdminMenu" resultMap="menuMap">
+        select * from superadmin_menu;
+    </select>
+    <select id="getAdminMenu" resultMap="menuMap">
+        select * from admin_menu;
     </select>
 </mapper>

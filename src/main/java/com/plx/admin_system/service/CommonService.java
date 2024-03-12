@@ -6,21 +6,17 @@ import com.plx.admin_system.utils.pojo.MenuList;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 public interface CommonService {
     void createCaptchaImage(HttpServletResponse response, String sessionId);
 
     boolean verify(String code, String sessionId);
 
-    List<MenuList> getAdminMenu();
 
-    List<MenuList> getSuperAdminMenu();
+    Map login(UserDto user);
 
-    List<MenuList> getStudentMenu();
+    boolean logout();
 
-    List<MenuList> getTeacherMenu();
-
-    ResponseResult login(UserDto user);
-
-    ResponseResult logout();
+    List<MenuList> getMenu(String token);
 }

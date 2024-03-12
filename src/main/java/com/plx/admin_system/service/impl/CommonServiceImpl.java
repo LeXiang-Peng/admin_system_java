@@ -13,7 +13,6 @@ import com.plx.admin_system.utils.JwtUtil;
 import com.plx.admin_system.utils.RedisCache;
 import com.plx.admin_system.utils.pojo.Captcha;
 import com.plx.admin_system.utils.pojo.MenuList;
-import io.swagger.models.auth.In;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,8 +30,6 @@ import java.util.Objects;
  */
 @Service
 public class CommonServiceImpl implements CommonService {
-    @Resource
-    private CommonUtils commonUtils;
     @Resource
     private CommonMapper commonMapper;
     @Resource
@@ -75,32 +72,12 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public List<MenuList> getAdminMenu() {
-        return commonUtils.generateMenu(commonMapper.getAdminMenuView());
-    }
-
-    @Override
-    public List<MenuList> getSuperAdminMenu() {
-        return commonUtils.generateMenu(commonMapper.getSuperAdminMenuView());
-    }
-
-    @Override
-    public List<MenuList> getStudentMenu() {
-        return commonUtils.generateMenu(commonMapper.getStudentMenuView());
-    }
-
-    @Override
-    public List<MenuList> getTeacherMenu() {
-        return commonUtils.generateMenu(commonMapper.getTeacherMenuView());
-    }
-
-    @Override
-    public ResponseResult login(UserDto user) {
+    public Map login(UserDto user) {
         //AuthenticationManager authenticate进行用户认证
         UserAuthenticationToken token = new UserAuthenticationToken(user.getId(), user.getPassword(), user.getRole());
         Authentication authenticate = authenticationManager.authenticate(token);
         if (Objects.isNull(authenticate)) {
-            throw new RuntimeException("登录失败");
+            throw new RuntimeException("用户名或密码错误");
         } else {
             //认证成功，生成jwt，返回ResponseResult对象
             MyUserDetails loginUser = (MyUserDetails) authenticate.getPrincipal();
@@ -110,19 +87,45 @@ public class CommonServiceImpl implements CommonService {
             map.put("token", jwt);
             //把完整的用户信息存入redis, userId 作为key
             redisCache.setCacheObject(CommonUtils.getRedisUserKey(userId), loginUser);
-            return new ResponseResult(200, "登录成功", map);
+            return map;
         }
     }
 
     @Override
-    public ResponseResult logout() {
+    public boolean logout() {
         //从SecurityContextHolder中获取userId
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MyUserDetails loginUser = (MyUserDetails) authentication.getPrincipal();
         String userId = String.valueOf(loginUser.getUserId());
         //删除Redis删除userId
-        redisCache.deleteObject(CommonUtils.getRedisUserKey(userId));
-        return new ResponseResult(200, "登出成功");
+        return redisCache.deleteObject(CommonUtils.getRedisUserKey(userId));
+    }
+
+    @Override
+    public List<MenuList> getMenu(String token) {
+        MyUserDetails user = redisCache.getCacheObject(CommonUtils.parseJWT(token));
+        if (Objects.isNull(user)) {
+            return null;
+        }
+        List<String> list = user.getPermission();
+        switch (list.get(0)) {
+            case CommonUtils.IDENTITY_STUDENT:
+                return CommonUtils.generateMenu(commonMapper.getStudentMenu());
+            case CommonUtils.IDENTITY_TEACHER:
+                if (list.size() == 2) {
+                    return CommonUtils.generateMenu(commonMapper.getTeacherAdminMenu());
+                } else {
+                    return CommonUtils.generateMenu(commonMapper.getTeacherMenu());
+                }
+            case CommonUtils.IDENTITY_ADMIN:
+                if (list.size() == 2) {
+                    return CommonUtils.generateMenu(commonMapper.getSuperAdminMenu());
+                } else {
+                    return CommonUtils.generateMenu(commonMapper.getAdminMenu());
+                }
+            default:
+                return null;
+        }
     }
 
 }

@@ -1,6 +1,8 @@
 package com.plx.admin_system.service.impl;
 
 import com.plx.admin_system.entity.Admin;
+import com.plx.admin_system.entity.Student;
+import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.User;
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.mapper.CommonMapper;
@@ -10,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -22,18 +26,36 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public MyUserDetails loadUserByUseridAndRole(Integer userId, String role) throws UsernameNotFoundException {
-        User user;
+        List<String> list = new ArrayList<>();
         switch (role) {
-            case "student":
-                user = commonMapper.getOneStudentById(userId);
-                return Objects.isNull(user) ? null : new MyUserDetails(user, CommonUtils.IDENTITY_STUDENT);
-            case "teacher":
-                user = commonMapper.getOneTeacherById(userId);
-                return Objects.isNull(user) ? null : new MyUserDetails(user, CommonUtils.IDENTITY_TEACHER);
-            case "admin":
+            case CommonUtils.IDENTITY_STUDENT:
+                Student student = commonMapper.getOneStudentById(userId);
+                if (Objects.isNull(student)) {
+                    return null;
+                }
+                list.add(CommonUtils.IDENTITY_STUDENT);
+                return new MyUserDetails(student, list);
+            case CommonUtils.IDENTITY_TEACHER:
+                Teacher teacher = commonMapper.getOneTeacherById(userId);
+                if (Objects.isNull(teacher)) {
+                    return null;
+                }
+                list.add(CommonUtils.IDENTITY_TEACHER);
+                if (teacher.getIsAuthorized() == 1) {
+                    list.add(CommonUtils.IDENTITY_ADMIN);
+                }
+                return new MyUserDetails(teacher, list);
+            case CommonUtils.IDENTITY_ADMIN:
                 Admin admin = commonMapper.getOneAdminById(userId);
-                return Objects.isNull(admin) ? null : admin.getAdminType() == 1 ?
-                        new MyUserDetails(admin, CommonUtils.IDENTITY_SUPER_ADMIN) : new MyUserDetails(admin, CommonUtils.IDENTITY_ADMIN);
+                if (Objects.isNull(admin)) {
+                    return null;
+                }
+                list.add(CommonUtils.IDENTITY_ADMIN);
+                if (admin.getAdminType() == 1) {
+                    list.add(CommonUtils.IDENTITY_SUPER_ADMIN);
+                }
+                System.out.println(list);
+                return new MyUserDetails(admin, list);
             default:
                 return null;
         }

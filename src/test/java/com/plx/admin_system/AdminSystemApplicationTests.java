@@ -1,5 +1,6 @@
 package com.plx.admin_system;
 
+import com.plx.admin_system.mapper.CommonMapper;
 import com.plx.admin_system.service.CommonService;
 import com.plx.admin_system.service.impl.CommonServiceImpl;
 import com.plx.admin_system.utils.CommonUtils;
@@ -17,25 +18,8 @@ class AdminSystemApplicationTests {
 
     @Test
     void contextLoads() {
-        int count = 0;
-        for (int i = 0; i < 120; i++) {
-            count++;
-            int finalI = i;
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                commonService.createCaptchaImage(null, "sessionId:" + finalI);
-            }).start();
-
-        }
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3MjEwMTY4YTJmY2Q0MWFhODQwODNlZWUzNTZlZmVlNSIsInN1YiI6IjEiLCJpc3MiOiJzZyIsImlhdCI6MTcxMDA1NzU5NiwiZXhwIjoxNzEwMDYxMTk2fQ.B8UYzZJO5gQDDvY50njEgHcWQewr75OQdeE1ay6mIjg";
+        System.out.println(commonService.getMenu(token));
     }
 
 }

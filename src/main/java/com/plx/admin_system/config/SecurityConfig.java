@@ -1,6 +1,8 @@
 package com.plx.admin_system.config;
 
 import com.plx.admin_system.filter.JwtAuthenticationTokenFilter;
+import com.plx.admin_system.handler.AccessDeniedHandlerImpl;
+import com.plx.admin_system.handler.AuthenticationEntryPointImpl;
 import com.plx.admin_system.security.password.UserAuthenticationProvider;
 import com.plx.admin_system.service.UserDetailsService;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +30,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     UserDetailsService userDetailsService;
     @Resource
     JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+    @Resource
+    AuthenticationEntryPointImpl authenticationEntryPoint;
+    @Resource
+    AccessDeniedHandlerImpl accessDeniedHandler;
 
     UserAuthenticationProvider getProvider() {
         UserAuthenticationProvider provider = new UserAuthenticationProvider();
@@ -50,7 +56,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/common/captcha").anonymous()
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated();
+        //添加过滤器
         httpSecurity.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        //配置异常处理器
+        httpSecurity
+                .exceptionHandling()
+                    .authenticationEntryPoint(authenticationEntryPoint)
+                    .accessDeniedHandler(accessDeniedHandler);
+        //允许跨域
+        httpSecurity.cors();
     }
 
     @Override

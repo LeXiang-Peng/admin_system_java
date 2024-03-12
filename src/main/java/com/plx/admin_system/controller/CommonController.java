@@ -3,13 +3,18 @@ package com.plx.admin_system.controller;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.dto.UserDto;
 import com.plx.admin_system.service.CommonService;
+import com.plx.admin_system.utils.CommonUtils;
 import com.plx.admin_system.utils.pojo.MenuList;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author plx
@@ -28,32 +33,26 @@ public class CommonController {
 
     @PostMapping("/login")
     public ResponseResult login(@RequestBody UserDto user, HttpSession session) {
-        //!commonService.verify(user.getCode(), session.getId())
+        //!commonService.verify(user.(), session.getId())
         if (false) {
-            return new ResponseResult(204, "验证码错误");
+            return new ResponseResult(HttpStatus.NO_CONTENT.value(), "验证码错误");
         } else {
-            return commonService.login(user);
+            Map map = commonService.login(user);
+            return Objects.isNull(map) ? new ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现错误")
+                    : new ResponseResult(HttpStatus.OK.value(), "登录成功", map);
         }
     }
 
-    @GetMapping("/getMenu/{role}")
-    public List<MenuList> getMenu(@PathVariable String role) {
-        switch (role) {
-            case "admin":
-                return commonService.getAdminMenu();
-            case "superadmin":
-                return commonService.getSuperAdminMenu();
-            case "student":
-                return commonService.getStudentMenu();
-            case "teacher":
-                return commonService.getTeacherMenu();
-            default:
-                return null;
-        }
+    @GetMapping("/getMenu")
+    public ResponseResult getMenu(HttpServletRequest request) {
+        List<MenuList> menu = commonService.getMenu(request.getHeader(CommonUtils.HEADER_TOKEN_KEY));
+        return Objects.isNull(menu) ? new ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现错误")
+                : new ResponseResult(HttpStatus.OK.value(), "获取成功", menu);
     }
 
     @GetMapping("/logout")
-    public ResponseResult logout(){
-        return commonService.logout();
+    public ResponseResult logout() {
+        return commonService.logout() ? new ResponseResult(HttpStatus.OK.value(), "登出成功")
+                : new ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现错误");
     }
 }

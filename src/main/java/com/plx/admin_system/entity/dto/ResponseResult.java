@@ -59,5 +59,6 @@ public class ResponseResult<T> {
         this.msg = msg;
         this.data = data;
     }
+
 }
 

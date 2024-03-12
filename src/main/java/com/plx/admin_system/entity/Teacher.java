@@ -37,6 +37,8 @@ public class Teacher extends User {
 
     private String teacherGender;
 
+    private Integer isAuthorized;
+
     public void setTeacherId(Integer teacherId) {
         super.setUserId(teacherId);
         this.teacherId = teacherId;
