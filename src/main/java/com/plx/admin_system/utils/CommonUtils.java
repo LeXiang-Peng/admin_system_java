@@ -3,13 +3,19 @@ package com.plx.admin_system.utils;
 
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.entity.views.Menu;
+import com.plx.admin_system.entity.views.OptionsView;
+import com.plx.admin_system.utils.pojo.Clazz;
 import com.plx.admin_system.utils.pojo.MenuList;
+import com.plx.admin_system.utils.pojo.Options;
+import com.plx.admin_system.utils.pojo.Profession;
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author plx
@@ -37,7 +43,12 @@ public class CommonUtils {
         }
     }
 
-    //生成多级菜单
+    /**
+     * generate menu 生成多级菜单
+     *
+     * @param menuView
+     * @return
+     */
     public static List<MenuList> generateMenu(HashMap<Integer, Menu> menuView) {
         //将List索引和ParentMenuId建立hash映射
         HashMap<Integer, Integer> index = new HashMap<>();
@@ -70,5 +81,36 @@ public class CommonUtils {
             }
         }
         return menuListArrayUtil;
+    }
+
+    /**
+     * generate options 生成多级选项菜单
+     *
+     * @param optionsViewList
+     * @return
+     */
+    public static List<Options> generateOptions(List<OptionsView> optionsViewList) {
+        HashMap<String, Options> optionsHashMap = new HashMap<>();
+        HashMap<String, Profession> professionHashMap = new HashMap<>();
+        for (OptionsView item : optionsViewList) {
+            Profession profession = professionHashMap.get(item.getProfession());
+            if (Objects.isNull(profession)) {
+                profession = new Profession(item.getDepartment(), item.getProfession(), item.getClazz());
+            } else {
+                profession.getClazzList().add(new Clazz(item.getClazz()));
+            }
+            professionHashMap.put(profession.getProfession(), profession);
+        }
+        for (Profession item : professionHashMap.values()) {
+            Options options = optionsHashMap.get(item.getDepartment());
+            if (Objects.isNull(options)) {
+                options = new Options(item);
+                optionsHashMap.put(options.getDepartment(), options);
+            } else {
+                options.getProfessionList().add(item);
+            }
+            optionsHashMap.put(options.getDepartment(), options);
+        }
+        return optionsHashMap.values().stream().collect(Collectors.toList());
     }
 }

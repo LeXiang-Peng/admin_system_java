@@ -3,7 +3,6 @@ package com.plx.admin_system.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.org.glassfish.gmbal.Description;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +13,7 @@ import lombok.Setter;
  * </p>
  *
  * @author plx
- * @since 2024-03-05
+ * @since 2024-03-13
  */
 @Getter
 @Setter
@@ -28,6 +27,8 @@ public class Admin extends User {
 
     private String adminName;
 
+    private String departmentName;
+
     private String adminEmail;
     @JsonIgnore
     private String adminPassword;
@@ -36,7 +37,6 @@ public class Admin extends User {
 
     private String adminGender;
 
-    @Description("0是普通权限，1是super权限")
     private Byte adminType;
 
     public void setAdminId(Integer adminId) {

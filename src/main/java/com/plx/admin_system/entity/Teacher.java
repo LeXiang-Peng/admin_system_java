@@ -6,8 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
+import lombok.ToString;
 
 /**
  * <p>
@@ -15,11 +14,12 @@ import java.io.Serializable;
  * </p>
  *
  * @author plx
- * @since 2024-02-27
+ * @since 2024-03-13
  */
 @Getter
 @Setter
 @Schema(name = "Teacher", description = "")
+@ToString
 public class Teacher extends User {
 
     private static final long serialVersionUID = 1L;
@@ -29,6 +29,8 @@ public class Teacher extends User {
 
     private String teacherName;
 
+    private String departmentName;
+
     private String teacherEmail;
     @JsonIgnore
     private String teacherPassword;
@@ -37,7 +39,9 @@ public class Teacher extends User {
 
     private String teacherGender;
 
-    private Integer isAuthorized;
+    private Byte isAuthorized;
+
+    private Byte isExisted;
 
     public void setTeacherId(Integer teacherId) {
         super.setUserId(teacherId);
@@ -48,5 +52,4 @@ public class Teacher extends User {
         super.setPassword(teacherPassword);
         this.teacherPassword = teacherPassword;
     }
-
 }

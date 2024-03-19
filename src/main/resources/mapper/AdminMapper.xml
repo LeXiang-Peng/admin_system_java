@@ -1,5 +1,134 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.plx.admin_system.mapper.AdminMapper">
+    <sql id="key">
+        <trim suffixOverrides=",">
+            <if test="studentId != null">
+                student_id,
+            </if>
+            student_name,
+            <if test="studentGender != null and studentGender != ''">
+                student_gender,
+            </if>
+            <if test="studentEmail != null and studentEmail != ''">
+                student_email,
+            </if>
+            <if test="studentPhoneNumber != null and studentPhoneNumber != ''">
+                student_phone_number,
+            </if>
+            clazz_name,
+            <if test="identificationNumber != null and identificationNumber != ''">
+                identification_number,
+            </if>
+        </trim>
+    </sql>
+    <sql id="value">
+        <trim suffixOverrides=",">
+            <if test="studentId != null">
+                #{studentId},
+            </if>
+            #{studentName},
+            <if test="studentGender != null and studentGender != ''">
+                #{studentGender},
+            </if>
+            <if test="studentEmail != null and studentEmail != ''">
+                #{studentEmail},
+            </if>
+            <if test="studentPhoneNumber != null and studentPhoneNumber != ''">
+                #{studentPhoneNumber},
+            </if>
+            #{clazzName},
+            <if test="identificationNumber != null and identificationNumber != ''">
+                #{identificationNumber},
+            </if>
+        </trim>
+    </sql>
+    <insert id="newOneStudent">
+        insert into student(<include refid="key"></include>)
+        value (<include refid="value"></include>)
+    </insert>
+
+    <update id="updateOneStudent" parameterType="com.plx.admin_system.entity.Student">
+        update student
+        <set>
+            <if test="studentId != null">
+                student_id = #{studentId},
+            </if>
+            <if test="studentName != null and studentName != ''">
+                student_name = #{studentName},
+            </if>
+            <if test="studentGender != null and studentGender != ''">
+                student_gender = #{studentGender}
+            </if>
+            <if test="studentPhoneNumber != null and studentPhoneNumber != ''">
+                student_email = #{studentPhoneNumber},
+            </if>
+            <if test="studentEmail != null and studentEmail != ''">
+                student_email = #{studentEmail},
+            </if>
+            <if test="studentPassword != null and studentPassword != ''">
+                student_password = #{studentPassword},
+            </if>
+        </set>
+    </update>
+
+    <update id="deleteOneStudent">
+        update student
+        set is_existed = false
+        where student_id = #{id}
+    </update>
+
+    <update id="resetStudentPassword">
+        update student
+        set student_password = default
+        where student_id = #{id}
+    </update>
+
+    <resultMap id="studentsMap" type="com.plx.admin_system.entity.views.StudentList">
+        <result column="id" property="id" jdbcType="INTEGER"></result>
+        <result column="name" property="name" jdbcType="VARCHAR"></result>
+        <result column="clazz" property="clazz" jdbcType="VARCHAR"></result>
+        <result column="profession" property="profession" jdbcType="VARCHAR"></result>
+        <result column="department" property="department" jdbcType="VARCHAR"></result>
+        <result column="gender" property="gender" jdbcType="VARCHAR"></result>
+    </resultMap>
+
+    <resultMap id="total" type="Integer">
+        <result column="total" jdbcType="INTEGER" javaType="Integer"></result>
+    </resultMap>
+
+    <sql id="queryParams">
+        <if test="queryParams != null">
+            <where>
+                <trim prefixOverrides="and">
+                    <if test="queryParams.id != null">
+                        id = #{queryParams.id}
+                    </if>
+                    <if test="queryParams.name != null and queryParams.name != ''">
+                        and name like concat('%',#{queryParams.name},'%')
+                    </if>
+                    <if test="queryParams.clazz != null and queryParams.clazz != ''">
+                        and clazz = #{queryParams.clazz}
+                    </if>
+                    <if test="queryParams.profession != null and queryParams.profession != ''">
+                        and profession = #{queryParams.profession}
+                    </if>
+                    <if test="queryParams.department != null and queryParams.department != ''">
+                        and department = #{queryParams.department}
+                    </if>
+                </trim>
+            </where>
+        </if>
+    </sql>
+
+    <select id="getStudentList" resultMap="studentsMap,total">
+        select sql_calc_found_rows *
+        from student_list <include refid="queryParams"></include> order by id asc limit #{pageNum}, #{pageSize};
+        select found_rows() as total;
+    </select>
+
+    <select id="getOptionsView" resultType="com.plx.admin_system.entity.views.OptionsView">
+        select * from clazz_profession_department_view
+    </select>
 
 </mapper>

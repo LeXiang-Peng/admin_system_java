@@ -66,9 +66,9 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public boolean verify(String code, String sessionId) {
+    public Boolean verifyCode(String code, String sessionId) {
         Captcha captcha = (Captcha) map.get(sessionId);
-        return Objects.isNull(captcha) ? false : captcha.verify(code);
+        return Objects.isNull(captcha) ? false : captcha.verifyCode(code);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public boolean logout() {
+    public Boolean logout() {
         //从SecurityContextHolder中获取userId
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         MyUserDetails loginUser = (MyUserDetails) authentication.getPrincipal();

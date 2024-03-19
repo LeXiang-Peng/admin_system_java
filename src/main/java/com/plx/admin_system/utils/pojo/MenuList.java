@@ -19,12 +19,20 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MenuList {
+    private Integer menuId;
     private String menuName;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<MenuList> menuChildren;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String menuUrl;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String menuIcon;
     //Constructor
     public MenuList(Menu menuView){
+        this.menuIcon = menuView.getMenuIcon();
+        this.menuId = menuView.getMenuId();
         this.menuName = menuView.getMenuName();
+        this.menuUrl = menuView.getMenuUrl();
         this.menuChildren= new ArrayList<>();
     }
 }

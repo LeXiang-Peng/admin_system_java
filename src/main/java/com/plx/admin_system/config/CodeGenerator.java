@@ -44,7 +44,7 @@ public class CodeGenerator {
                             .pathInfo(Collections.singletonMap(OutputFile.xml, projectPath+"\\src\\main\\resources\\mapper")); // 设置mapperXml生成路径
                 })
                 .strategyConfig(builder -> {
-                    builder.addInclude("admin")// 设置需要生成的表名
+                    builder.addInclude("student")// 设置需要生成的表名
                             .addTablePrefix("t_", "c_") // 设置过滤表前缀
                             .controllerBuilder().enableHyphenStyle() //设置驼峰命名
                             .entityBuilder().enableLombok().enableFileOverride()  //entity 包开启 lombok 和覆盖

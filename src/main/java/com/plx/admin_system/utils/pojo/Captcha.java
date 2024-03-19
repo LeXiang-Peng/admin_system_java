@@ -32,7 +32,7 @@ public class Captcha extends AbstractCaptcha {
     private static final Integer COUNT = 4;
     private static final Integer LINECOUNT = 50;
     private Integer visits;
-    private boolean isUsed;
+    private Boolean isUsed;
 
     public Captcha() {
         super(WIDTH, HEIGHT, COUNT, LINECOUNT);
@@ -50,9 +50,8 @@ public class Captcha extends AbstractCaptcha {
         return image;
     }
 
-    @Override
-    public boolean verify(String code) {
-        boolean result = isUsed ? false : super.verify(code);
+    public Boolean verifyCode(String code) {
+        Boolean result = isUsed ? false : super.verify(code);
         isUsed = true;
         return result;
     }

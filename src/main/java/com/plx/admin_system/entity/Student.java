@@ -7,15 +7,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
-
 /**
  * <p>
- *
+ * 
  * </p>
  *
  * @author plx
- * @since 2024-02-27
+ * @since 2024-03-13
  */
 @Getter
 @Setter
@@ -29,17 +27,19 @@ public class Student extends User {
 
     private String studentName;
 
-    private String studentEmail;
-
-    private Integer professionId;
-
-    private Integer identificationNumber;
-    @JsonIgnore
-    private String studentPassword;
+    private String studentGender;
 
     private String studentPhoneNumber;
 
-    private String studentGender;
+    private String studentEmail;
+
+    private String clazzName;
+    @JsonIgnore
+    private String identificationNumber;
+    @JsonIgnore
+    private String studentPassword;
+
+    private Byte isExisted;
 
     public void setStudentId(Integer studentId) {
         super.setUserId(studentId);
@@ -50,5 +50,4 @@ public class Student extends User {
         super.setPassword(studentPassword);
         this.studentPassword = studentPassword;
     }
-
 }

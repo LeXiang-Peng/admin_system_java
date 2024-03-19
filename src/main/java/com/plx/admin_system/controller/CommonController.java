@@ -33,7 +33,7 @@ public class CommonController {
 
     @PostMapping("/login")
     public ResponseResult login(@RequestBody UserDto user, HttpSession session) {
-        //!commonService.verify(user.(), session.getId())
+        //!commonService.verifyCode(user.(), session.getId())
         if (false) {
             return new ResponseResult(HttpStatus.NO_CONTENT.value(), "验证码错误");
         } else {

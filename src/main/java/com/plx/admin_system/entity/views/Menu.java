@@ -15,5 +15,7 @@ public class Menu {
     @TableId(value = "menu_id")
     private Integer menuId;
     private String menuName;
+    private String menuIcon;
+    private String menuUrl;
     private Integer parentMenuId;
 }

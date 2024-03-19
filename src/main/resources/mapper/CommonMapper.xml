@@ -7,7 +7,6 @@
         <result column="parent_menu_id" property="parentMenuId"></result>
     </resultMap>
 
-
     <select id="getOneStudentById" resultType="com.plx.admin_system.entity.Student">
         select student_id, student_password from student where student_id = #{id}
     </select>
@@ -15,7 +14,7 @@
         select admin_id, admin_password, admin_type from admin where admin_id = #{id}
     </select>
     <select id="getOneTeacherById" resultType="com.plx.admin_system.entity.Teacher">
-        select teacher_id, teacher_password from teacher where teacher_id = #{id}
+        select teacher_id, teacher_password, is_authorized from teacher where teacher_id = #{id}
     </select>
     <select id="getStudentMenu" resultMap="menuMap">
         select * from student_menu;
