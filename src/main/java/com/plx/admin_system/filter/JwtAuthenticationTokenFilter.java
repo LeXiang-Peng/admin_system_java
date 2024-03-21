@@ -1,12 +1,9 @@
 package com.plx.admin_system.filter;
 
 import com.plx.admin_system.entity.dto.MyUserDetails;
-import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.security.password.UserAuthenticationToken;
 import com.plx.admin_system.utils.CommonUtils;
-import com.plx.admin_system.utils.JwtUtil;
 import com.plx.admin_system.utils.RedisCache;
-import io.jsonwebtoken.Claims;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;

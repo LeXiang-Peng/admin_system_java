@@ -72,10 +72,13 @@
         </set>
     </update>
 
-    <update id="deleteOneStudent">
+    <update id="deleteStudents">
         update student
         set is_existed = false
-        where student_id = #{id}
+        where student_id in 
+        <foreach collection="id" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
     </update>
 
     <update id="resetStudentPassword">
@@ -129,6 +132,9 @@
 
     <select id="getOptionsView" resultType="com.plx.admin_system.entity.views.OptionsView">
         select * from clazz_profession_department_view
+    </select>
+    <select id="getAllStudents" resultType="com.plx.admin_system.entity.views.StudentList">
+        select * from student_list;
     </select>
 
 </mapper>

@@ -49,7 +49,7 @@ public class Teacher extends User {
     }
 
     public void setTeacherPassword(String teacherPassword) {
-        super.setPassword(teacherPassword);
+        super.setUserPassword(teacherPassword);
         this.teacherPassword = teacherPassword;
     }
 }

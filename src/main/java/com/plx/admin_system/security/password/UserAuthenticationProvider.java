@@ -1,9 +1,7 @@
 package com.plx.admin_system.security.password;
 
-import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.service.UserDetailsService;
-import com.plx.admin_system.utils.CommonUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -12,7 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**

@@ -1,8 +1,7 @@
 package com.plx.admin_system.mapper;
 
-import com.plx.admin_system.entity.Teacher;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Mapper;
+import com.plx.admin_system.entity.Teacher;
 
 /**
  * <p>

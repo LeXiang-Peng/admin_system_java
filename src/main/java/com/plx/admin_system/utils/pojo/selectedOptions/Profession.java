@@ -1,4 +1,4 @@
-package com.plx.admin_system.utils.pojo;
+package com.plx.admin_system.utils.pojo.selectedOptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;

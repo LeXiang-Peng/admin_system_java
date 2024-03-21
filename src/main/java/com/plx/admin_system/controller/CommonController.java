@@ -38,7 +38,7 @@ public class CommonController {
             return new ResponseResult(HttpStatus.NO_CONTENT.value(), "验证码错误");
         } else {
             Map map = commonService.login(user);
-            return Objects.isNull(map) ? new ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现错误")
+            return Objects.isNull(map) ? new ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现错误，请联系管理人员")
                     : new ResponseResult(HttpStatus.OK.value(), "登录成功", map);
         }
     }
@@ -46,13 +46,13 @@ public class CommonController {
     @GetMapping("/getMenu")
     public ResponseResult getMenu(HttpServletRequest request) {
         List<MenuList> menu = commonService.getMenu(request.getHeader(CommonUtils.HEADER_TOKEN_KEY));
-        return Objects.isNull(menu) ? new ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现错误")
+        return Objects.isNull(menu) ? new ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现错误，请联系管理人员")
                 : new ResponseResult(HttpStatus.OK.value(), "获取成功", menu);
     }
 
     @GetMapping("/logout")
     public ResponseResult logout() {
         return commonService.logout() ? new ResponseResult(HttpStatus.OK.value(), "登出成功")
-                : new ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现错误");
+                : new ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现错误，请联系管理人员");
     }
 }

@@ -4,11 +4,12 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.views.StudentList;
-import com.plx.admin_system.utils.pojo.Options;
+import com.plx.admin_system.utils.pojo.selectedOptions.Options;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>
@@ -39,23 +40,27 @@ public interface IAdminService extends IService<Admin> {
 
     /**
      * 获取多级选项菜单
+     *
      * @return Options
      */
     List<Options> getOptions();
 
     /**
      * update one student 更新一条学生信息
+     *
      * @param student
      * @return
      */
     Boolean updateOneStudent(Student student);
+
     /**
      * delete student 逻辑删除
      *
      * @param id
      * @return
      */
-    Boolean deleteOneStudent(Integer id);
+    Boolean deleteStudents(List<Integer> id);
+
     /**
      * reset student password 重置学生密码
      *
@@ -63,4 +68,19 @@ public interface IAdminService extends IService<Admin> {
      * @return
      */
     Boolean resetStudentPassword(Integer id);
+
+    /**
+     * verify identity 身份验证
+     *
+     * @param password
+     * @return Boolean
+     */
+    Boolean verifyIdentity(String password);
+
+    /**
+     * export all students 导出所有的学生信息
+     *
+     * @param response
+     */
+    void exportAllStudents(HttpServletResponse response);
 }

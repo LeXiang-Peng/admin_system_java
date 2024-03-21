@@ -2,7 +2,6 @@ package com.plx.admin_system.entity;
 
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,5 +18,5 @@ public class User implements Serializable {
     @TableField(exist = false)
     private Integer userId;
     @TableField(exist = false)
-    private String password;
+    private String userPassword;
 }

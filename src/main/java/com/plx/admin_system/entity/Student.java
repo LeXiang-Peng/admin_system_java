@@ -3,6 +3,7 @@ package com.plx.admin_system.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,16 +24,17 @@ public class Student extends User {
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "student_id", type = IdType.AUTO)
+    @JsonProperty("id")
     private Integer studentId;
-
+    @JsonProperty("name")
     private String studentName;
-
+    @JsonProperty("gender")
     private String studentGender;
 
     private String studentPhoneNumber;
 
     private String studentEmail;
-
+    @JsonProperty("clazz")
     private String clazzName;
     @JsonIgnore
     private String identificationNumber;
@@ -47,7 +49,7 @@ public class Student extends User {
     }
 
     public void setStudentPassword(String studentPassword) {
-        super.setPassword(studentPassword);
+        super.setUserPassword(studentPassword);
         this.studentPassword = studentPassword;
     }
 }

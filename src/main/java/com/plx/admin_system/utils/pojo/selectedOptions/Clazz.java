@@ -1,4 +1,4 @@
-package com.plx.admin_system.utils.pojo;
+package com.plx.admin_system.utils.pojo.selectedOptions;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

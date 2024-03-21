@@ -3,7 +3,6 @@ package com.plx.admin_system.service.impl;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.plx.admin_system.entity.dto.MyUserDetails;
-import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.dto.UserDto;
 import com.plx.admin_system.mapper.CommonMapper;
 import com.plx.admin_system.security.password.UserAuthenticationToken;

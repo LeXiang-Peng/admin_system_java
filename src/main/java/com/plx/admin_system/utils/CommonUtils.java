@@ -1,20 +1,23 @@
 package com.plx.admin_system.utils;
 
 
-import com.plx.admin_system.entity.dto.MyUserDetails;
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
+import cn.afterturn.easypoi.excel.entity.ExportParams;
 import com.plx.admin_system.entity.views.Menu;
 import com.plx.admin_system.entity.views.OptionsView;
-import com.plx.admin_system.utils.pojo.Clazz;
+import com.plx.admin_system.entity.views.StudentList;
 import com.plx.admin_system.utils.pojo.MenuList;
-import com.plx.admin_system.utils.pojo.Options;
-import com.plx.admin_system.utils.pojo.Profession;
+import com.plx.admin_system.utils.pojo.selectedOptions.Clazz;
+import com.plx.admin_system.utils.pojo.selectedOptions.Options;
+import com.plx.admin_system.utils.pojo.selectedOptions.Profession;
 import io.jsonwebtoken.Claims;
+import org.apache.poi.ss.formula.functions.T;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -112,5 +115,31 @@ public class CommonUtils {
             optionsHashMap.put(options.getDepartment(), options);
         }
         return optionsHashMap.values().stream().collect(Collectors.toList());
+    }
+
+    public static void exportData(Class<?> pojoClass, Collection<?> dataSet, String fileName,
+                                  String sheetName, String title, HttpServletResponse response) {
+        try {
+            //设置信息头，告诉浏览器内容为excel类型
+            response.setHeader("content-Type", "application/vnd.ms-excel");
+            fileName = new String(fileName.getBytes(), "ISO-8859-1");
+
+            //设置下载名称
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+            //字节流输出
+            ServletOutputStream out = response.getOutputStream();
+            //设置excel参数
+            ExportParams params = new ExportParams();
+            //设置sheet名
+            params.setSheetName(sheetName);
+            //设置标题
+            params.setTitle(title);
+            //导入excel
+            Workbook workbook = ExcelExportUtil.exportExcel(params, pojoClass, dataSet);
+            //写入
+            workbook.write(out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

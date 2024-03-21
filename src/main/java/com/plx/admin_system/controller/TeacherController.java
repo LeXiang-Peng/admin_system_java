@@ -1,15 +1,12 @@
  package com.plx.admin_system.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
-import java.util.List;
+ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+ import com.plx.admin_system.entity.Teacher;
+ import com.plx.admin_system.service.ITeacherService;
+ import org.springframework.web.bind.annotation.*;
 
-import com.plx.admin_system.service.ITeacherService;
-import com.plx.admin_system.entity.Teacher;
-
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+ import javax.annotation.Resource;
+ import java.util.List;
 
 /**
  * <p>

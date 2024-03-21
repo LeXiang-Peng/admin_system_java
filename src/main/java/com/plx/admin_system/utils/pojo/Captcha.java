@@ -15,9 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**

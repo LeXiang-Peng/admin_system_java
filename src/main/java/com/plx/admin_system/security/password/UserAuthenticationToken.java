@@ -1,15 +1,10 @@
 package com.plx.admin_system.security.password;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.security.auth.Subject;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author plx
