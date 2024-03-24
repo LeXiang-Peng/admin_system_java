@@ -6,11 +6,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author plx
@@ -19,6 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Schema(name = "Student", description = "")
+@NoArgsConstructor
 public class Student extends User {
 
     private static final long serialVersionUID = 1L;

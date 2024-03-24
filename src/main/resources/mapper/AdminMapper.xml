@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.plx.admin_system.mapper.AdminMapper">
-    <sql id="key">
+    <sql id="studentKey">
         <trim suffixOverrides=",">
             <if test="studentId != null">
                 student_id,
@@ -22,7 +22,7 @@
             </if>
         </trim>
     </sql>
-    <sql id="value">
+    <sql id="studentValue">
         <trim suffixOverrides=",">
             <if test="studentId != null">
                 #{studentId},
@@ -43,9 +43,99 @@
             </if>
         </trim>
     </sql>
+    <sql id="teacherKey">
+        <trim suffixOverrides=",">
+            <if test="teacherId != null">
+                teacher_id,
+            </if>
+            teacher_name,
+            <if test="teacherGender != null and teacherGender != ''">
+                teacher_gender,
+            </if>
+            <if test="teacherEmail != null and teacherEmail != ''">
+                teacher_email,
+            </if>
+            <if test="teacherPhoneNumber != null and teacherPhoneNumber != ''">
+                teacher_phone_number,
+            </if>
+            department_name
+        </trim>
+    </sql>
+    <sql id="teacherValue">
+        <trim suffixOverrides=",">
+            <if test="teacherId != null">
+                #{teacherId},
+            </if>
+            #{teacherName},
+            <if test="teacherGender != null and teacherGender != ''">
+                #{teacherGender},
+            </if>
+            <if test="teacherEmail != null and teacherEmail != ''">
+                #{teacherEmail},
+            </if>
+            <if test="teacherPhoneNumber != null and teacherPhoneNumber != ''">
+                #{teacherPhoneNumber},
+            </if>
+            #{departmentName}
+        </trim>
+    </sql>
+    <sql id="adminKey">
+        <trim suffixOverrides=",">
+            <if test="adminId != null">
+                admin_id,
+            </if>
+            admin_name,
+            <if test="adminGender != null and adminGender != ''">
+                admin_gender,
+            </if>
+            <if test="adminEmail != null and adminEmail != ''">
+                admin_email,
+            </if>
+            <if test="adminPhoneNumber != null and adminPhoneNumber != ''">
+                admin_phone_number,
+            </if>
+        </trim>
+    </sql>
+    <sql id="adminValue">
+        <trim suffixOverrides=",">
+            <if test="adminId != null">
+                #{adminId},
+            </if>
+            #{adminName},
+            <if test="adminGender != null and adminGender != ''">
+                #{adminGender},
+            </if>
+            <if test="adminEmail != null and adminEmail != ''">
+                #{adminEmail},
+            </if>
+            <if test="adminPhoneNumber != null and adminPhoneNumber != ''">
+                #{adminPhoneNumber},
+            </if>
+        </trim>
+    </sql>
+
     <insert id="newOneStudent">
-        insert into student(<include refid="key"></include>)
-        value (<include refid="value"></include>)
+        insert into student(<include refid="studentKey"></include>)
+        value (<include refid="studentValue"></include>)
+    </insert>
+    <insert id="newStudents" parameterType="com.plx.admin_system.entity.views.StudentView">
+        insert into student(student_id, student_name, clazz_name, student_gender)
+            value (#{id},#{name},#{clazz},#{gender})
+    </insert>
+
+    <insert id="newOneTeacher">
+        insert into teacher(<include refid="teacherKey"></include>)
+        value (<include refid="teacherValue"></include>)
+    </insert>
+
+    <insert id="newTeachers" parameterType="com.plx.admin_system.entity.views.TeacherView">
+        insert into teacher(teacher_id, teacher_name, department_name, teacher_gender)
+            value (#{id},#{name},#{department},#{gender})
+    </insert>
+
+    <insert id="newOneAdmin">
+        insert into admin(<include refid="adminKey"></include>)
+        value (<include refid="adminValue"></include>)
     </insert>
 
     <update id="updateOneStudent" parameterType="com.plx.admin_system.entity.Student">
@@ -70,12 +160,13 @@
                 student_password = #{studentPassword},
             </if>
         </set>
+        where student_id = #{id}
     </update>
 
     <update id="deleteStudents">
         update student
         set is_existed = false
-        where student_id in 
+        where student_id in
         <foreach collection="id" open="(" close=")" separator="," item="item">
             #{item}
         </foreach>
@@ -86,8 +177,44 @@
         set student_password = default
         where student_id = #{id}
     </update>
+    <update id="resetTeacherPassword">
+        update teacher
+        set teacher_password = default
+        where teacher_id = #{id}
+    </update>
 
-    <resultMap id="studentsMap" type="com.plx.admin_system.entity.views.StudentList">
+    <update id="updateOneTeacher">
+
+    </update>
+    <update id="deleteTeachers">
+        update teacher
+        set is_existed = false
+        where teacher_id in
+        <foreach collection="id" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </update>
+    <update id="grant">
+        update teacher
+        set is_authorized = 1
+        where teacher_id = #{id}
+    </update>
+
+    <update id="deleteAdmins">
+        update admin
+        set is_existed = false
+        where admin_id in
+        <foreach collection="id" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </update>
+    <update id="resetAdminPassword">
+        update admin
+        set admin_password = default
+        where admin_id = #{id}
+    </update>
+
+    <resultMap id="studentsMap" type="com.plx.admin_system.entity.views.StudentView">
         <result column="id" property="id" jdbcType="INTEGER"></result>
         <result column="name" property="name" jdbcType="VARCHAR"></result>
         <result column="clazz" property="clazz" jdbcType="VARCHAR"></result>
@@ -100,24 +227,24 @@
         <result column="total" jdbcType="INTEGER" javaType="Integer"></result>
     </resultMap>
 
-    <sql id="queryParams">
-        <if test="queryParams != null">
+    <sql id="queryStudentParams">
+        <if test="queryStudentParams != null">
             <where>
                 <trim prefixOverrides="and">
-                    <if test="queryParams.id != null">
-                        id = #{queryParams.id}
+                    <if test="queryStudentParams.id != null">
+                        id like concat(#{queryStudentParams.id},'%')
                     </if>
-                    <if test="queryParams.name != null and queryParams.name != ''">
-                        and name like concat('%',#{queryParams.name},'%')
+                    <if test="queryStudentParams.name != null and queryStudentParams.name != ''">
+                        and name like concat('%',#{queryStudentParams.name},'%')
                     </if>
-                    <if test="queryParams.clazz != null and queryParams.clazz != ''">
-                        and clazz = #{queryParams.clazz}
+                    <if test="queryStudentParams.clazz != null and queryStudentParams.clazz != ''">
+                        and clazz = #{queryStudentParams.clazz}
                     </if>
-                    <if test="queryParams.profession != null and queryParams.profession != ''">
-                        and profession = #{queryParams.profession}
+                    <if test="queryStudentParams.profession != null and queryStudentParams.profession != ''">
+                        and profession = #{queryStudentParams.profession}
                     </if>
-                    <if test="queryParams.department != null and queryParams.department != ''">
-                        and department = #{queryParams.department}
+                    <if test="queryStudentParams.department != null and queryStudentParams.department != ''">
+                        and department = #{queryStudentParams.department}
                     </if>
                 </trim>
             </where>
@@ -126,15 +253,84 @@
 
     <select id="getStudentList" resultMap="studentsMap,total">
         select sql_calc_found_rows *
-        from student_list <include refid="queryParams"></include> order by id asc limit #{pageNum}, #{pageSize};
+        from student_list <include refid="queryStudentParams"></include> order by id asc limit #{pageNum}, #{pageSize};
         select found_rows() as total;
     </select>
 
     <select id="getOptionsView" resultType="com.plx.admin_system.entity.views.OptionsView">
-        select * from clazz_profession_department_view
+        select *
+        from clazz_profession_department_view
     </select>
-    <select id="getAllStudents" resultType="com.plx.admin_system.entity.views.StudentList">
-        select * from student_list;
+    <select id="getAllStudents" resultType="com.plx.admin_system.entity.views.StudentView">
+        select *
+        from student_list;
+    </select>
+    <select id="getAllTeachers" resultType="com.plx.admin_system.entity.views.TeacherView">
+        select *
+        from teacher_list
+    </select>
+
+    <resultMap id="teachersMap" type="com.plx.admin_system.entity.views.TeacherView">
+        <result column="id" property="id" jdbcType="SMALLINT"></result>
+        <result column="name" property="name" jdbcType="VARCHAR"></result>
+        <result column="department" property="department" jdbcType="VARCHAR"></result>
+        <result column="gender" property="gender" jdbcType="VARCHAR"></result>
+    </resultMap>
+
+    <sql id="queryTeacherParams">
+        <if test="queryTeacherParams != null">
+            <where>
+                <trim prefixOverrides="and">
+                    <if test="queryTeacherParams.id != null">
+                        id like concat(#{queryTeacherParams.id},'%')
+                    </if>
+                    <if test="queryTeacherParams.name != null and queryTeacherParams.name != ''">
+                        and name like concat('%',#{queryTeacherParams.name},'%')
+                    </if>
+                    <if test="queryTeacherParams.department != null and queryTeacherParams.department != ''">
+                        and department = #{queryTeacherParams.department}
+                    </if>
+                </trim>
+            </where>
+        </if>
+    </sql>
+
+    <select id="getTeacherList" resultMap="teachersMap,total">
+        select sql_calc_found_rows *
+        from teacher_list <include refid="queryTeacherParams"></include> order by id asc limit #{pageNum}, #{pageSize};
+        select found_rows() as total;
+    </select>
+
+    <select id="getDepartmentList" resultType="java.lang.String">
+        select department_name as department
+        from department
+    </select>
+
+    <resultMap id="adminsMap" type="com.plx.admin_system.entity.views.AdminView">
+        <result column="id" property="id" jdbcType="SMALLINT"></result>
+        <result column="name" property="name" jdbcType="VARCHAR"></result>
+        <result column="gender" property="gender" jdbcType="VARCHAR"></result>
+    </resultMap>
+
+    <sql id="queryAdminParams">
+        <if test="queryAdminParams != null">
+            <where>
+                <trim prefixOverrides="and">
+                    <if test="queryAdminParams.id != null">
+                        id like concat(#{queryAdminParams.id},'%')
+                    </if>
+                    <if test="queryAdminParams.name != null and queryAdminParams.name != ''">
+                        and name like concat('%',#{queryAdminParams.name},'%')
+                    </if>
+                </trim>
+            </where>
+        </if>
+    </sql>
+
+    <select id="getAdminList" resultMap="adminsMap,total">
+        select sql_calc_found_rows *
+        from admin_list <include refid="queryAdminParams"></include> order by id asc limit #{pageNum}, #{pageSize};
+        select found_rows() as total;
     </select>
 
 </mapper>

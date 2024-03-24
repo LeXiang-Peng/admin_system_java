@@ -2,19 +2,25 @@ package com.plx.admin_system.utils;
 
 
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
+import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
+import cn.afterturn.easypoi.excel.entity.ImportParams;
+import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.Menu;
 import com.plx.admin_system.entity.views.OptionsView;
-import com.plx.admin_system.entity.views.StudentList;
 import com.plx.admin_system.utils.pojo.MenuList;
 import com.plx.admin_system.utils.pojo.selectedOptions.Clazz;
 import com.plx.admin_system.utils.pojo.selectedOptions.Options;
 import com.plx.admin_system.utils.pojo.selectedOptions.Profession;
 import io.jsonwebtoken.Claims;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -117,6 +123,16 @@ public class CommonUtils {
         return optionsHashMap.values().stream().collect(Collectors.toList());
     }
 
+    /**
+     * export data 导出数据的工具类
+     *
+     * @param pojoClass
+     * @param dataSet
+     * @param fileName
+     * @param sheetName
+     * @param title
+     * @param response
+     */
     public static void exportData(Class<?> pojoClass, Collection<?> dataSet, String fileName,
                                   String sheetName, String title, HttpServletResponse response) {
         try {
@@ -141,5 +157,50 @@ public class CommonUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * import data 导入数据
+     *
+     * @param pojoClass
+     * @param file
+     * @param <T>
+     * @return
+     */
+    public static <T> List<T> importData(Class<?> pojoClass, MultipartFile file) {
+        ImportParams importParams = new ImportParams();
+        //标题行设置为1行，默认是0，可以不设置；依实际情况设置。
+        importParams.setTitleRows(1);
+        // 表头设置为1行
+        importParams.setHeadRows(1);
+        //设置检查 数据不能为空
+        ClassExcelVerifyHandler verifyHandler = new ClassExcelVerifyHandler();
+        importParams.setVerifyHandler(verifyHandler);
+        try {
+            return ExcelImportUtil.importExcel(file.getInputStream(), pojoClass, importParams);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * commit 向数据库提交数据
+     *
+     * @param sqlSession
+     * @return
+     */
+    public static ResponseResult commit(SqlSession sqlSession) {
+        try {
+            sqlSession.commit();
+        } catch (Exception e) {
+            sqlSession.rollback();
+            sqlSession.clearCache();
+            sqlSession.close();
+            return new ResponseResult(HttpStatus.FORBIDDEN.value(), "文件内容有误，请重新上传");
+        }
+        sqlSession.clearCache();
+        sqlSession.close();
+        return new ResponseResult(HttpStatus.OK.value(), "导入成功");
     }
 }

@@ -20,7 +20,7 @@ import java.io.IOException;
 public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        ResponseResult result = new ResponseResult(HttpStatus.FORBIDDEN.value(), "请求非法");
+        ResponseResult result = new ResponseResult(HttpStatus.FORBIDDEN.value(), "权限不足");
         String resultJson = JSON.toJSONString(result);
         //处理异常
         WebUtil.renderString(response, resultJson);

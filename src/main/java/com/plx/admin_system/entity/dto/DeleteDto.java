@@ -9,8 +9,9 @@ import java.util.List;
  * @author plx
  */
 @Data
-public class DeleteStudentsDto {
+public class DeleteDto {
     @JsonProperty("id")
     List<Integer> id;
+    @JsonProperty("password")
     String password;
 }

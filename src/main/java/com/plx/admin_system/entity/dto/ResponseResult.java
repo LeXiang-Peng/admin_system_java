@@ -1,11 +1,13 @@
 package com.plx.admin_system.entity.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.ToString;
 
 /**
  * @Author 三更  B站： https://space.bilibili.com/663528522
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@ToString
 public class ResponseResult<T> {
     /**
      * 状态码

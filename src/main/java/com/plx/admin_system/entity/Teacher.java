@@ -3,6 +3,7 @@ package com.plx.admin_system.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,10 +26,11 @@ public class Teacher extends User {
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "teacher_id", type = IdType.AUTO)
+    @JsonProperty("id")
     private Integer teacherId;
-
+    @JsonProperty("name")
     private String teacherName;
-
+    @JsonProperty("department")
     private String departmentName;
 
     private String teacherEmail;
@@ -36,7 +38,7 @@ public class Teacher extends User {
     private String teacherPassword;
 
     private String teacherPhoneNumber;
-
+    @JsonProperty("gender")
     private String teacherGender;
 
     private Byte isAuthorized;
