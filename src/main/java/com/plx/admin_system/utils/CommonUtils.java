@@ -14,13 +14,11 @@ import com.plx.admin_system.utils.pojo.selectedOptions.Options;
 import com.plx.admin_system.utils.pojo.selectedOptions.Profession;
 import io.jsonwebtoken.Claims;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -38,15 +36,16 @@ public class CommonUtils {
     public static final String IDENTITY_TEACHER = "teacher";
     public static final String IDENTITY_ADMIN = "admin";
     public static final String IDENTITY_SUPER_ADMIN = "admin+";
+    public static final String IDENTITY_PERMANENT_ADMIN = "adminPlus";
 
-    public static String getRedisUserKey(String userId) {
-        return PREFIX + userId;
+    public static String getRedisUserKey(String userId, String userName) {
+        return PREFIX + userId + userName;
     }
 
     public static String parseJWT(String token) {
         try {
             Claims claims = JwtUtil.parseJWT(token);
-            return getRedisUserKey(claims.getSubject());
+            return getRedisUserKey(claims.getSubject(), "");
         } catch (Exception e) {
             throw new RuntimeException("token非法");
         }

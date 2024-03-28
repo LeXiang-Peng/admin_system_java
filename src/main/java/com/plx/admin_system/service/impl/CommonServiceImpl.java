@@ -81,11 +81,12 @@ public class CommonServiceImpl implements CommonService {
             //认证成功，生成jwt，返回ResponseResult对象
             MyUserDetails loginUser = (MyUserDetails) authenticate.getPrincipal();
             String userId = String.valueOf(loginUser.getUserId());
-            String jwt = JwtUtil.createJWT(userId);
+            String userName = loginUser.getUsername();
+            String jwt = JwtUtil.createJWT(userId + userName);
             Map<String, String> map = new HashMap();
             map.put("token", jwt);
             //把完整的用户信息存入redis, userId 作为key
-            redisCache.setCacheObject(CommonUtils.getRedisUserKey(userId), loginUser);
+            redisCache.setCacheObject(CommonUtils.getRedisUserKey(userId, userName), loginUser);
             return map;
         }
     }
@@ -97,7 +98,7 @@ public class CommonServiceImpl implements CommonService {
         MyUserDetails loginUser = (MyUserDetails) authentication.getPrincipal();
         String userId = String.valueOf(loginUser.getUserId());
         //删除Redis删除userId
-        return redisCache.deleteObject(CommonUtils.getRedisUserKey(userId));
+        return redisCache.deleteObject(CommonUtils.getRedisUserKey(userId, loginUser.getUsername()));
     }
 
     @Override
@@ -107,17 +108,23 @@ public class CommonServiceImpl implements CommonService {
             return null;
         }
         List<String> list = user.getPermission();
+        System.out.println(list);
+        if (list.size() == 0) {
+            return CommonUtils.generateMenu(commonMapper.getRevokedAdminMenu());
+        }
         switch (list.get(0)) {
             case CommonUtils.IDENTITY_STUDENT:
                 return CommonUtils.generateMenu(commonMapper.getStudentMenu());
             case CommonUtils.IDENTITY_TEACHER:
-                if (list.size() == 2) {
+                if (list.size() == 3) {
+                    return CommonUtils.generateMenu(commonMapper.getTeacherSuperAdminMenu());
+                } else if (list.size() == 2) {
                     return CommonUtils.generateMenu(commonMapper.getTeacherAdminMenu());
                 } else {
                     return CommonUtils.generateMenu(commonMapper.getTeacherMenu());
                 }
             case CommonUtils.IDENTITY_ADMIN:
-                if (list.size() == 2) {
+                if (list.size() == 2 || list.size() == 3) {
                     return CommonUtils.generateMenu(commonMapper.getSuperAdminMenu());
                 } else {
                     return CommonUtils.generateMenu(commonMapper.getAdminMenu());

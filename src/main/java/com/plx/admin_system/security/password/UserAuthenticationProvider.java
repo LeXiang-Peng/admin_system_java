@@ -33,6 +33,8 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         if (Objects.isNull(user) || !passwordEncoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("用户ID或密码错误!");
         }
+        System.out.println(user);
+        System.out.println(user.getUsername());
         return new UserAuthenticationToken(user, user.getAuthorities());
     }
 

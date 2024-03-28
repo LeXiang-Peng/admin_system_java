@@ -1,5 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.plx.admin_system.mapper.TeacherMapper">
+    <resultMap id="coursesMap" type="com.plx.admin_system.entity.ApprovalingCourse">
+        <result column="approvaling_course_id" property="approvalingCourseId" jdbcType="INTEGER"></result>
+        <result column="course_name" property="courseName" jdbcType="VARCHAR"></result>
+        <result column="course_type" property="courseType" jdbcType="TINYINT"></result>
+        <result column="lecturer_id" property="lecturerId" jdbcType="INTEGER"></result>
+        <result column="lecturer" property="lecturer" jdbcType="VARCHAR"></result>
+        <result column="semester" property="semester" jdbcType="VARCHAR"></result>
+        <result column="category" property="category" jdbcType="VARCHAR"></result>
+        <result column="remark" property="remark" jdbcType="VARCHAR"></result>
+        <result column="status" property="status" jdbcType="TINYINT"></result>
+    </resultMap>
 
+    <resultMap id="total2" type="Integer">
+        <result column="total" jdbcType="INTEGER" javaType="Integer"></result>
+    </resultMap>
+
+    <sql id="queryCourseParams">
+        <where>
+            lecturer_id = #{id}
+            <if test="queryCourseParams != null">
+                <if test="queryCourseParams.courseName != null and queryCourseParams.courseName != ''">
+                    and course_name like concat('%',#{queryCourseParams.courseName},'%')
+                </if>
+                <if test="queryCourseParams.status != null">
+                    and status = #{queryCourseParams.status}
+                </if>
+                <if test="queryCourseParams.category != null and queryCourseParams.category != ''">
+                    and category =#{queryCourseParams.category}
+                </if>
+                <if test="queryCourseParams.courseType != null">
+                    and course_type =#{queryCourseParams.courseType}
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <sql id="pendingCourseKey">
+        <if test="clazzName != null and clazzName != ''">
+            clazz_name,
+        </if>
+        course_name,
+        course_type,
+        lecturer_id,
+        lecturer,
+        remark,
+        semester,
+        category
+    </sql>
+    <sql id="pendingCourseValue">
+        <if test="clazzName != null and clazzName != ''">
+            #{clazzName},
+        </if>
+        #{courseName} ,
+        #{courseType} ,
+        #{lecturerId} ,
+        #{lecturer} ,
+        #{remark} ,
+        #{semester},
+        #{category}
+    </sql>
+
+    <insert id="declareOneCourse" parameterType="com.plx.admin_system.entity.ApprovalingCourse">
+        insert into approvaling_course(<include refid="pendingCourseKey"></include>)
+        value (<include refid="pendingCourseValue"></include>)
+    </insert>
+
+    <update id="cancelCourse">
+        update approvaling_course
+        set status = 3
+        where approvaling_course_id = #{id}
+    </update>
+
+    <update id="editCourse" parameterType="com.plx.admin_system.entity.ApprovalingCourse">
+        update approvaling_course
+        <set>
+            <if test="courseName != null and courseName != ''">
+                course_name = #{courseName},
+            </if>
+            <if test="clazzName != null and clazzName != ''">
+                clazz_name = #{clazzName},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="semester != null and semester != ''">
+                semester = #{semester},
+            </if>
+            <if test="category != null and category != ''">
+                category = #{category},
+            </if>
+        </set>
+        where approvaling_course_id =#{approvalingCourseId}
+    </update>
+
+    <delete id="deleteCourseInfo">
+        delete from approvaling_course where approvaling_course_id in
+        <foreach collection="id" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="getCourseList" resultMap="coursesMap,total2">
+        select sql_calc_found_rows approvaling_course_id, clazz_name, course_name, category, remark, course_type,
+        semester, status
+        from approvaling_course
+        <include refid="queryCourseParams"></include>
+        limit #{pageNum}, #{pageSize};
+        select found_rows() as total;
+    </select>
+    <select id="getCategoryList" resultType="String">
+        select category_name from category
+    </select>
 </mapper>

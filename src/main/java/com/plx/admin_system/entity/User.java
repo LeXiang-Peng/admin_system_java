@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 
@@ -13,10 +14,12 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
-@JsonIgnoreProperties({ "userId", "password" })
+@ToString
 public class User implements Serializable {
     @TableField(exist = false)
     private Integer userId;
     @TableField(exist = false)
     private String userPassword;
+    @TableField(exist = false)
+    private String userName;
 }

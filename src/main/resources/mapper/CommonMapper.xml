@@ -8,27 +8,34 @@
     </resultMap>
 
     <select id="getOneStudentById" resultType="com.plx.admin_system.entity.Student">
-        select student_id, student_password from student where student_id = #{id}
+        select student_id, student_name, student_password from student where student_id = #{id}
     </select>
     <select id="getOneAdminById" resultType="com.plx.admin_system.entity.Admin">
-        select admin_id, admin_password, admin_type from admin where admin_id = #{id}
+        select admin_id, admin_name, admin_password, admin_type from admin where admin_id = #{id}
     </select>
     <select id="getOneTeacherById" resultType="com.plx.admin_system.entity.Teacher">
-        select teacher_id, teacher_password, is_authorized from teacher where teacher_id = #{id}
+        select teacher_id, teacher_name, teacher_password, is_authorized from teacher where teacher_id = #{id}
     </select>
     <select id="getStudentMenu" resultMap="menuMap">
-        select * from student_menu;
+        select * from student_menu
     </select>
     <select id="getTeacherAdminMenu" resultMap="menuMap">
-        select * from teacher_admin_menu;
+        select * from teacher_admin_menu
     </select>
     <select id="getTeacherMenu" resultMap="menuMap">
-        select * from teacher_menu;
+        select * from teacher_menu
     </select>
     <select id="getSuperAdminMenu" resultMap="menuMap">
-        select * from superadmin_menu;
+        select * from superadmin_menu
     </select>
     <select id="getAdminMenu" resultMap="menuMap">
-        select * from admin_menu;
+        select * from admin_menu
     </select>
+    <select id="getRevokedAdminMenu" resultMap="menuMap">
+        select * from revoked_admin_menu
+    </select>
+    <select id="getTeacherSuperAdminMenu" resultMap="menuMap">
+        select * from teacher_superadmin_menu
+    </select>
+
 </mapper>

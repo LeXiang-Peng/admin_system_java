@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
-import com.plx.admin_system.entity.views.AdminView;
-import com.plx.admin_system.entity.views.OptionsView;
-import com.plx.admin_system.entity.views.StudentView;
-import com.plx.admin_system.entity.views.TeacherView;
+import com.plx.admin_system.entity.views.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -29,7 +26,8 @@ public interface AdminMapper extends BaseMapper<Admin> {
      * @param pageNum     Integer 从数据库的第pageNum开始显示
      * @return List
      */
-    List<List<?>> getStudentList(@Param("queryStudentParams") StudentView queryParams, @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
+    List<List<?>> getStudentList(@Param("queryStudentParams") StudentView queryParams,
+                                 @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
 
     /**
      * new student 创建一个新的学生
@@ -101,7 +99,8 @@ public interface AdminMapper extends BaseMapper<Admin> {
      * @param pageNum     Integer 从数据库的第pageNum开始显示
      * @return List
      */
-    List<List<?>> getTeacherList(@Param("queryTeacherParams") TeacherView queryParams, @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
+    List<List<?>> getTeacherList(@Param("queryTeacherParams") TeacherView queryParams,
+                                 @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
 
     /**
      * get department list 给前端返回下拉菜单列表
@@ -145,6 +144,22 @@ public interface AdminMapper extends BaseMapper<Admin> {
     Boolean deleteTeachers(@Param("id") List<Integer> id);
 
     /**
+     * delete non_admin students 删除非管理员教师 逻辑删除
+     *
+     * @param id
+     * @return Boolean
+     */
+    Boolean deleteNonAdminTeachers(@Param("id") List<Integer> id);
+
+    /**
+     * delete non_super_admin students 删除非超管教师 逻辑删除
+     *
+     * @param id
+     * @return Boolean
+     */
+    Boolean deleteNonSuperAdminTeachers(@Param("id") List<Integer> id);
+
+    /**
      * new teachers 批量插入教师
      *
      * @param teacher
@@ -153,12 +168,12 @@ public interface AdminMapper extends BaseMapper<Admin> {
     Integer newTeachers(TeacherView teacher);
 
     /**
-     * grant 授权
+     * grant teacher 教师授权
      *
      * @param id
      * @return Boolean
      */
-    Boolean grant(@Param("id") Integer id);
+    Boolean grantTeacher(@Param("id") Integer id);
 
     /**
      * get student list 获取学生列表 并返回列表的数据条数 分页查询
@@ -168,7 +183,8 @@ public interface AdminMapper extends BaseMapper<Admin> {
      * @param pageNum     Integer 从数据库的第pageNum开始显示
      * @return List
      */
-    List<List<?>> getAdminList(@Param("queryAdminParams") AdminView queryParams, @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
+    List<List<?>> getAdminList(@Param("queryAdminParams") AdminView queryParams,
+                               @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
 
     /**
      * new student 创建一个新的学生
@@ -193,4 +209,114 @@ public interface AdminMapper extends BaseMapper<Admin> {
      * @return Boolean
      */
     Boolean resetAdminPassword(@Param("id") Integer id);
+
+    /**
+     * grant admin 恢复管理员的权限
+     *
+     * @param id
+     * @return Boolean
+     */
+    Boolean grantAdmin(@Param("id") Integer id);
+
+    /**
+     * revoke admin a day 一天之后自动解除禁权
+     *
+     * @param id
+     * @return
+     */
+    Boolean revokeAdminADay(@Param("id") Integer id);
+
+    /**
+     * revoke admin 永久禁权 只有永久超管才能解除禁权
+     *
+     * @param id
+     * @return
+     */
+    Boolean revokeAdmin(@Param("id") Integer id);
+
+    /**
+     * privilege escalation a day 权限提升一天
+     *
+     * @param id
+     * @return
+     */
+    Boolean privilegeEscalationADay(@Param("id") Integer id);
+
+    /**
+     * demotion rights 对超管进行降权
+     *
+     * @param id
+     * @return
+     */
+    Boolean demotionRights(@Param("id") Integer id);
+
+    /**
+     * get granted teacher list 获取已授权的教师
+     *
+     * @param queryParams
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+    List<List<?>> getGrantedTeacherList(@Param("queryTeacherParams") TeacherView queryParams,
+                                        @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
+
+    /**
+     * revoke teacher 回收教师管理员权限
+     *
+     * @param id
+     * @return
+     */
+    Boolean revokeTeacher(@Param("id") Integer id);
+
+    /**
+     * ban teacher a day 禁权一天
+     *
+     * @param id
+     * @return
+     */
+    Boolean banTeacherADay(@Param("id") Integer id);
+
+    /**
+     * ban teacher  永久禁权
+     *
+     * @param id
+     * @return
+     */
+    Boolean banTeacher(@Param("id") Integer id);
+
+    /**
+     * privilege escalation a day 2 对老师的权限进行提升，**时限一天**
+     *
+     * @param id
+     * @return
+     */
+    Boolean privilegeEscalationADay2(@Param("id") Integer id);
+
+    /**
+     * get pending courses 获得待审核的课程
+     *
+     * @param queryParams
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+    List<List<?>> getPendingCourses(@Param("queryPendingCoursesParams") PendingCourse queryParams,
+                                    @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
+
+    /**
+     * reject course request 否决课程申报
+     *
+     * @param id
+     * @return
+     */
+    Boolean rejectCourseRequest(@Param("id") Integer id);
+
+    /**
+     * pass course 通过课程申报
+     *
+     * @param course
+     * @return
+     */
+    Boolean passCourseRequest(PendingCourse course);
 }

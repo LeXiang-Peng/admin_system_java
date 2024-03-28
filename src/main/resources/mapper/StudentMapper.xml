@@ -2,4 +2,56 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.plx.admin_system.mapper.StudentMapper">
 
+    <resultMap id="studentCoursesMap" type="com.plx.admin_system.entity.views.PendingCourse">
+        <result column="id" property="id" jdbcType="INTEGER"></result>
+        <result column="course" property="course" jdbcType="VARCHAR"></result>
+        <result column="type" property="type" jdbcType="TINYINT"></result>
+        <result column="category" property="category" jdbcType="VARCHAR"></result>
+        <result column="lecturer_id" property="lecturerId" jdbcType="INTEGER"></result>
+        <result column="lecturer" property="lecturer" jdbcType="VARCHAR"></result>
+        <result column="hours" property="hours" jdbcType="INTEGER"></result>
+        <result column="credits" property="credits" jdbcType="FLOAT"></result>
+        <result column="remark" property="remark" jdbcType="VARCHAR"></result>
+    </resultMap>
+
+    <select id="getAllCourseList" resultMap="studentCoursesMap,studentCoursesMap">
+        with info as
+                 (
+                     select *
+                     from selected_course
+                     where student_id = #{id}
+                 ),
+             selected_course as
+                 (
+                     select course.course_id   as id,
+                            course.course_name as course,
+                            course_type        as type,
+                            course.category,
+                            lecturer_id,
+                            lecturer,
+                            hours,
+                            credits,
+                            remark
+                     from course,
+                          info
+                     where course.semester = info.semester
+                       and course.course_id = info.course_id
+                 )
+        select *
+        from selected_course;
+
+        select course.course_id   as id,
+               course.course_name as course,
+               course_type        as type,
+               course.category,
+               lecturer_id,
+               lecturer,
+               hours,
+               credits,
+               remark
+        from selected_course,
+             course
+        where course.category &lt;&gt; selected_course.category;
+
+    </select>
 </mapper>

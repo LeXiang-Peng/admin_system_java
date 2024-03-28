@@ -18,4 +18,6 @@ public class TeacherView implements Serializable {
     private String department;
     @Excel(name = "性别", width = 10.0, orderNum = "3")
     private String gender;
+
+    private Byte type;
 }

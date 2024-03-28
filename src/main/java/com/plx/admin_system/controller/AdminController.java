@@ -6,16 +6,20 @@ import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.dto.DeleteDto;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.AdminView;
+import com.plx.admin_system.entity.views.PendingCourse;
 import com.plx.admin_system.entity.views.StudentView;
 import com.plx.admin_system.entity.views.TeacherView;
 import com.plx.admin_system.service.IAdminService;
+import com.plx.admin_system.utils.CommonUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Objects;
 
 /**
  * <p>
@@ -40,7 +44,7 @@ public class AdminController {
     }
 
     @GetMapping("/options")
-    @PreAuthorize("hasAuthority('admin')")
+    @RolesAllowed({"admin", "teacher"})
     public ResponseResult getOptions() {
         return new ResponseResult(HttpStatus.OK.value(), "获取成功", adminService.getOptions());
     }
@@ -133,10 +137,27 @@ public class AdminController {
     @PreAuthorize("hasAuthority('admin')")
     public ResponseResult deleteTeachers(@RequestBody DeleteDto form) {
         if (adminService.verifyIdentity(form.getPassword())) {
-            return adminService.deleteTeachers(form.getId()) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
-                    new ResponseResult(HttpStatus.FORBIDDEN.value(), "删除失败，请联系管理人员");
+            String permission = adminService.getPermission();
+            if (CommonUtils.IDENTITY_ADMIN.equals(permission)) {
+                return adminService.deleteNonAdminTeachers(form.getId()) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
+                        new ResponseResult(HttpStatus.FORBIDDEN.value(), "删除失败，请联系管理人员");
+            } else if (CommonUtils.IDENTITY_SUPER_ADMIN.equals(permission)) {
+                return adminService.deleteNonSuperAdminTeachers(form.getId()) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
+                        new ResponseResult(HttpStatus.FORBIDDEN.value(), "删除失败，请联系管理人员");
+            } else if (CommonUtils.IDENTITY_PERMANENT_ADMIN.equals(permission)) {
+                return adminService.deleteTeachers(form.getId()) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
+                        new ResponseResult(HttpStatus.FORBIDDEN.value(), "删除失败，请联系管理人员");
+            }
         }
         return new ResponseResult(HttpStatus.FORBIDDEN.value(), "密码错误，请重新输入");
+    }
+
+    @GetMapping("/teacher/permission")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getPermission() {
+        String permission = adminService.getPermission();
+        return Objects.isNull(permission) ? new ResponseResult(HttpStatus.FORBIDDEN.value(), "权限获取失败，请联系管理人员") :
+                new ResponseResult(HttpStatus.OK.value(), "获取成功", permission);
     }
 
     @GetMapping("/teacher/export/empty")
@@ -153,27 +174,28 @@ public class AdminController {
 
     @GetMapping("/teacher/grant/{id}")
     @PreAuthorize("hasAuthority('admin+')")
-    public ResponseResult grant(@PathVariable Integer id) {
-        return adminService.grant(id) ? new ResponseResult(HttpStatus.OK.value(), "授权成功") :
+    public ResponseResult grantTeacher(@PathVariable Integer id) {
+        return adminService.grantTeacher(id) ? new ResponseResult(HttpStatus.OK.value(), "授权成功") :
                 new ResponseResult(HttpStatus.FORBIDDEN.value(), "授权失败");
     }
+
     @PostMapping("/list/{pageSize}/{pageNum}")
     @PreAuthorize("hasAuthority('admin+')")
     public ResponseResult getAdminList(@RequestBody(required = false) AdminView queryParams,
-                                         @PathVariable Integer pageSize, @PathVariable Integer pageNum) {
+                                       @PathVariable Integer pageSize, @PathVariable Integer pageNum) {
         return new ResponseResult(HttpStatus.OK.value(), "查询成功",
                 adminService.getAdminList(queryParams, pageSize, (pageNum - 1) * pageSize));
     }
 
     @PostMapping("/save")
-    @PreAuthorize("hasAuthority('admin+')")
+    @PreAuthorize("hasAuthority('adminPlus')")
     public ResponseResult newOneAdmin(@RequestBody Admin admin) {
         return adminService.newOneAdmin(admin) ? new ResponseResult(HttpStatus.OK.value(), "新增成功") :
                 new ResponseResult(HttpStatus.FORBIDDEN.value(), "新增失败，请联系管理人员");
     }
 
     @PostMapping("/delete")
-    @PreAuthorize("hasAuthority('admin+')")
+    @PreAuthorize("hasAuthority('adminPlus')")
     public ResponseResult deleteAdmins(@RequestBody DeleteDto form) {
         if (adminService.verifyIdentity(form.getPassword())) {
             return adminService.deleteAdmins(form.getId()) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
@@ -181,10 +203,103 @@ public class AdminController {
         }
         return new ResponseResult(HttpStatus.FORBIDDEN.value(), "密码错误，请重新输入");
     }
+
     @GetMapping("/resetPassword/{id}")
     @PreAuthorize("hasAuthority('admin+')")
     public ResponseResult resetAdminPassword(@PathVariable Integer id) {
         return adminService.resetAdminPassword(id) ? new ResponseResult(HttpStatus.OK.value(), "重置成功") :
                 new ResponseResult(HttpStatus.FORBIDDEN.value(), "重置失败，请联系管理人员");
+    }
+
+    @GetMapping("/revoke/temporary/{id}")
+    @PreAuthorize("hasAuthority('adminPlus')")
+    public ResponseResult revokeAdminADay(@PathVariable Integer id) {
+        return adminService.revokeAdminADay(id) ? new ResponseResult(HttpStatus.OK.value(), "禁权成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "禁权失败，请联系管理人员");
+    }
+
+    @GetMapping("/revoke/{id}")
+    @PreAuthorize("hasAuthority('adminPlus')")
+    public ResponseResult revokeAdmin(@PathVariable Integer id) {
+        return adminService.revokeAdmin(id) ? new ResponseResult(HttpStatus.OK.value(), "禁权成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "禁权失败，请联系管理人员");
+    }
+
+    @GetMapping("/grant/{id}")
+    @PreAuthorize("hasAuthority('adminPlus')")
+    public ResponseResult grantAdmin(@PathVariable Integer id) {
+        return adminService.grantAdmin(id) ? new ResponseResult(HttpStatus.OK.value(), "解除成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "解除失败，请联系管理人员");
+    }
+
+    @GetMapping("/grant/plus/{id}")
+    @PreAuthorize("hasAuthority('adminPlus')")
+    public ResponseResult privilegeEscalationADay(@PathVariable Integer id) {
+        return adminService.privilegeEscalationADay(id) ? new ResponseResult(HttpStatus.OK.value(), "提权成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "提权失败，请联系管理人员");
+    }
+
+    @GetMapping("/demotion/{id}")
+    @PreAuthorize("hasAuthority('adminPlus')")
+    public ResponseResult demotionRights(@PathVariable Integer id) {
+        return adminService.demotionRights(id) ? new ResponseResult(HttpStatus.OK.value(), "降权成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "降权失败，请联系管理人员");
+    }
+
+    @PostMapping("/teacher/granted/list/{pageSize}/{pageNum}")
+    @PreAuthorize("hasAuthority('admin+')")
+    public ResponseResult getGrantedTeacherList(@RequestBody(required = false) TeacherView queryParams,
+                                                @PathVariable Integer pageSize, @PathVariable Integer pageNum) {
+        return new ResponseResult(HttpStatus.OK.value(), "查询成功",
+                adminService.getGrantedTeacherList(queryParams, pageSize, (pageNum - 1) * pageSize));
+    }
+
+    @GetMapping("/teacher/granted/revoke/{id}")
+    @PreAuthorize("hasAuthority('adminPlus')")
+    public ResponseResult revokeTeacher(@PathVariable Integer id) {
+        return adminService.revokeTeacher(id) ? new ResponseResult(HttpStatus.OK.value(), "回收成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "回收失败，请联系管理人员");
+    }
+
+    @GetMapping("/teacher/granted/ban/temporary/{id}")
+    @PreAuthorize("hasAuthority('adminPlus')")
+    public ResponseResult banTeacherADay(@PathVariable Integer id) {
+        return adminService.banTeacherADay(id) ? new ResponseResult(HttpStatus.OK.value(), "禁权成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "禁权失败，请联系管理人员");
+    }
+
+    @GetMapping("/teacher/granted/ban/{id}")
+    @PreAuthorize("hasAuthority('adminPlus')")
+    public ResponseResult banTeacher(@PathVariable Integer id) {
+        return adminService.banTeacher(id) ? new ResponseResult(HttpStatus.OK.value(), "禁权成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "禁权失败，请联系管理人员");
+    }
+
+    @GetMapping("/teacher/granted/grant/plus/{id}")
+    @PreAuthorize("hasAuthority('adminPlus')")
+    public ResponseResult privilegeEscalationADay2(@PathVariable Integer id) {
+        return adminService.privilegeEscalationADay2(id) ? new ResponseResult(HttpStatus.OK.value(), "提权成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "提权失败，请联系管理人员");
+    }
+
+    @PostMapping("/course/list/{pageSize}/{pageNum}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getPendingCourses(@RequestBody(required = false) PendingCourse queryParams,
+                                            @PathVariable Integer pageSize, @PathVariable Integer pageNum) {
+        return new ResponseResult(HttpStatus.OK.value(), "查询成功",
+                adminService.getPendingCourses(queryParams, pageSize, (pageNum - 1) * pageSize));
+    }
+
+    @GetMapping("/course/reject/{id}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult rejectCourseRequest(@PathVariable Integer id) {
+        return adminService.rejectCourseRequest(id) ? new ResponseResult(HttpStatus.OK.value(), "否决成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "否决失败，请联系管理人员");
+    }
+
+    @PostMapping("/course/pass")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getPendingCourses(@RequestBody PendingCourse queryParams) {
+        return adminService.passCourseRequest(queryParams);
     }
 }

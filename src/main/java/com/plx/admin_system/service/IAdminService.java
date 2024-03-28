@@ -6,6 +6,7 @@ import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.AdminView;
+import com.plx.admin_system.entity.views.PendingCourse;
 import com.plx.admin_system.entity.views.StudentView;
 import com.plx.admin_system.entity.views.TeacherView;
 import com.plx.admin_system.utils.pojo.selectedOptions.Options;
@@ -26,7 +27,7 @@ import java.util.List;
  */
 public interface IAdminService extends IService<Admin> {
     /**
-     * get student list 获取学生列表 并返回列表的数据条数
+     * get student list 获取**学生列表** 并返回列表的数据条数
      *
      * @param queryParams StudentView 查询条件
      * @param pageSize    Integer  当前一页有多少个数据
@@ -84,6 +85,13 @@ public interface IAdminService extends IService<Admin> {
     Boolean verifyIdentity(String password);
 
     /**
+     * get permission
+     *
+     * @return String 返回最高权限
+     */
+    String getPermission();
+
+    /**
      * export all students 导出所有的学生信息
      *
      * @param response
@@ -106,7 +114,7 @@ public interface IAdminService extends IService<Admin> {
     ResponseResult importStudents(MultipartFile studentsFile);
 
     /**
-     * get teacher list 获取教师列表 并返回列表的数据条数
+     * get teacher list 获取**教师列表** 并返回列表的数据条数
      *
      * @param queryParams TeacherView 查询条件
      * @param pageSize    Integer  当前一页有多少个数据
@@ -154,6 +162,22 @@ public interface IAdminService extends IService<Admin> {
     Boolean deleteTeachers(List<Integer> id);
 
     /**
+     * delete non_admin students 姗迟非管理员教师 逻辑删除
+     *
+     * @param id
+     * @return Boolean
+     */
+    Boolean deleteNonAdminTeachers(List<Integer> id);
+
+    /**
+     * delete non_super_admin students 删除非超管教师 逻辑删除
+     *
+     * @param id
+     * @return Boolean
+     */
+    Boolean deleteNonSuperAdminTeachers(@Param("id") List<Integer> id);
+
+    /**
      * export empty teacher excel 导出空白的 **教师信息表**
      *
      * @param response
@@ -169,12 +193,12 @@ public interface IAdminService extends IService<Admin> {
     ResponseResult importTeachers(MultipartFile teachersFile);
 
     /**
-     * grant 授权
+     * grant teacher 授权教师
      *
      * @param id
      * @return Boolean
      */
-    Boolean grant(Integer id);
+    Boolean grantTeacher(Integer id);
 
     /**
      * get admin list 获取管理员列表 并返回列表的数据条数
@@ -208,5 +232,113 @@ public interface IAdminService extends IService<Admin> {
      * @param id
      * @return Boolean
      */
-    Boolean resetAdminPassword(@Param("id") Integer id);
+    Boolean resetAdminPassword(Integer id);
+
+    /**
+     * grant admin 恢复管理员的权限
+     *
+     * @param id
+     * @return Boolean
+     */
+    Boolean grantAdmin(Integer id);
+
+    /**
+     * revoke admin a day 一天之后自动解除禁权
+     *
+     * @param id
+     * @return
+     */
+    Boolean revokeAdminADay(Integer id);
+
+    /**
+     * revoke admin 永久禁权
+     *
+     * @param id
+     * @return
+     */
+    Boolean revokeAdmin(Integer id);
+
+    /**
+     * privilege escalation a day 权限提升一天
+     *
+     * @param id
+     * @return
+     */
+    Boolean privilegeEscalationADay(Integer id);
+
+    /**
+     * demotion rights 对超管进行降权
+     *
+     * @param id
+     * @return
+     */
+    Boolean demotionRights(Integer id);
+
+    /**
+     * get teacher list 获取**已授权教师列表** 并返回列表的数据条数
+     *
+     * @param queryParams TeacherView 查询条件
+     * @param pageSize    Integer  当前一页有多少个数据
+     * @param pageNum     Integer 当前页码的第一个数据位置
+     * @return HashMap
+     */
+    HashMap<String, Object> getGrantedTeacherList(TeacherView queryParams, Integer pageSize, Integer pageNum);
+
+    /**
+     * revoke teacher 回收教师管理员权限
+     *
+     * @param id
+     * @return
+     */
+    Boolean revokeTeacher(@Param("id") Integer id);
+
+    /**
+     * ban teacher a day 禁权一天
+     *
+     * @param id
+     * @return
+     */
+    Boolean banTeacherADay(@Param("id") Integer id);
+
+    /**
+     * ban teacher  永久禁权
+     *
+     * @param id
+     * @return
+     */
+    Boolean banTeacher(@Param("id") Integer id);
+
+    /**
+     * privilege escalation a day 2 对老师的权限进行提升，**时限一天**
+     *
+     * @param id
+     * @return
+     */
+    Boolean privilegeEscalationADay2(@Param("id") Integer id);
+
+    /**
+     * get pending courses 获得待审核的课程
+     *
+     * @param queryParams
+     * @param pageSize
+     * @param pageNum
+     * @return HashMap
+     */
+    HashMap<String, Object> getPendingCourses(PendingCourse queryParams, Integer pageSize, Integer pageNum);
+
+    /**
+     * reject course request 否决课程设备
+     *
+     * @param id
+     * @return
+     */
+    Boolean rejectCourseRequest(Integer id);
+
+    /**
+     * pass course 通过课程申报
+     *
+     * @param course
+     * @return
+     */
+    ResponseResult passCourseRequest(PendingCourse course);
 }

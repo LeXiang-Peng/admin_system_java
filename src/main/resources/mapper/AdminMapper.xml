@@ -148,7 +148,7 @@
                 student_name = #{studentName},
             </if>
             <if test="studentGender != null and studentGender != ''">
-                student_gender = #{studentGender}
+                student_gender = #{studentGender},
             </if>
             <if test="studentPhoneNumber != null and studentPhoneNumber != ''">
                 student_email = #{studentPhoneNumber},
@@ -194,7 +194,7 @@
             #{item}
         </foreach>
     </update>
-    <update id="grant">
+    <update id="grantTeacher">
         update teacher
         set is_authorized = 1
         where teacher_id = #{id}
@@ -213,6 +213,139 @@
         set admin_password = default
         where admin_id = #{id}
     </update>
+    <update id="grantAdmin">
+        update admin
+        set admin_type = default
+        where admin_id = #{id}
+    </update>
+    <update id="revokeAdminADay">
+        update admin
+        set admin_type = 2
+        where admin_id = #{id};
+        create
+        event revoke_admin_a_day
+        on schedule at current_timestamp + interval 5 second
+        DO
+        update admin
+        set admin_type = default
+        where admin_id = #{id};
+    </update>
+    <update id="revokeAdmin">
+        update admin
+        set admin_type = 3
+        where admin_id = #{id};
+    </update>
+    <update id="privilegeEscalationADay">
+        update admin
+        set admin_type = 1
+        where admin_id = #{id};
+        create
+        event grant_admin_a_day
+        on schedule at current_timestamp + interval 5 second
+        DO
+        update admin
+        set admin_type = default
+        where admin_id = #{id};
+    </update>
+    <update id="demotionRights">
+        update admin
+        set admin_type = default
+        where admin_id = #{id}
+    </update>
+
+    <update id="deleteNonAdminTeachers">
+        update teacher
+        set is_existed = false
+        where (is_authorized = 0 or is_authorized = 3) and teacher_id in
+        <foreach collection="id" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </update>
+    <update id="deleteNonSuperAdminTeachers">
+        update teacher
+        set is_existed = false
+        where is_authorized &lt;&gt; 2 and teacher_id in
+        <foreach collection="id" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </update>
+    <update id="revokeTeacher">
+        update teacher
+        set teacher.is_authorized = default
+        where teacher_id = #{id};
+    </update>
+    <update id="banTeacherADay">
+        update teacher
+        set teacher.is_authorized = 3
+        where teacher_id = #{id};
+        create
+        event revoke_teacher_a_day
+        on schedule at current_timestamp + interval 5 second
+        DO
+        update teacher
+        set is_authorized = 1
+        where teacher_id = #{id};
+    </update>
+    <update id="banTeacher">
+        update teacher
+        set teacher.is_authorized = 4
+        where teacher_id = #{id};
+    </update>
+    <update id="privilegeEscalationADay2">
+        update teacher
+        set teacher.is_authorized = 2
+        where teacher_id = #{id};
+        create
+        event grant_teacher_a_day
+        on schedule at current_timestamp + interval 5 second
+        DO
+        update teacher
+        set is_authorized = 1
+        where teacher_id = #{id};
+    </update>
+
+    <update id="rejectCourseRequest">
+        update approvaling_course
+        set status = 2
+        where approvaling_course_id = #{id}
+    </update>
+
+    <sql id="courseKey">
+        <if test="clazz != null and clazz != ''">
+            clazz_name,
+        </if>
+        course_name,
+        course_type,
+        lecturer_id,
+        lecturer,
+        hours,
+        credits,
+        remark,
+        semester,
+        category
+    </sql>
+    <sql id="courseValue">
+        <if test="clazz != null and clazz != ''">
+            #{clazz},
+        </if>
+        #{course} ,
+        #{type} ,
+        #{lecturerId} ,
+        #{lecturer} ,
+        #{hours} ,
+        #{credits} ,
+        #{remark} ,
+        #{semester},
+        #{category}
+    </sql>
+    <insert id="passCourseRequest">
+        update approvaling_course
+        set status = 1
+        where approvaling_course_id = #{id};
+        insert into course(<include refid="courseKey"></include>)
+        value(<include refid="courseValue"></include>);
+    </insert>
+
 
     <resultMap id="studentsMap" type="com.plx.admin_system.entity.views.StudentView">
         <result column="id" property="id" jdbcType="INTEGER"></result>
@@ -221,6 +354,7 @@
         <result column="profession" property="profession" jdbcType="VARCHAR"></result>
         <result column="department" property="department" jdbcType="VARCHAR"></result>
         <result column="gender" property="gender" jdbcType="VARCHAR"></result>
+        <result column="grade" property="grade" jdbcType="VARCHAR"></result>
     </resultMap>
 
     <resultMap id="total" type="Integer">
@@ -253,7 +387,9 @@
 
     <select id="getStudentList" resultMap="studentsMap,total">
         select sql_calc_found_rows *
-        from student_list <include refid="queryStudentParams"></include> order by id asc limit #{pageNum}, #{pageSize};
+        from student_list
+        <include refid="queryStudentParams"></include>
+        limit #{pageNum}, #{pageSize};
         select found_rows() as total;
     </select>
 
@@ -290,6 +426,9 @@
                     <if test="queryTeacherParams.department != null and queryTeacherParams.department != ''">
                         and department = #{queryTeacherParams.department}
                     </if>
+                    <if test="queryTeacherParams.type != null ">
+                        and type = #{queryTeacherParams.type}
+                    </if>
                 </trim>
             </where>
         </if>
@@ -297,7 +436,9 @@
 
     <select id="getTeacherList" resultMap="teachersMap,total">
         select sql_calc_found_rows *
-        from teacher_list <include refid="queryTeacherParams"></include> order by id asc limit #{pageNum}, #{pageSize};
+        from teacher_list
+        <include refid="queryTeacherParams"></include>
+        limit #{pageNum}, #{pageSize};
         select found_rows() as total;
     </select>
 
@@ -310,6 +451,7 @@
         <result column="id" property="id" jdbcType="SMALLINT"></result>
         <result column="name" property="name" jdbcType="VARCHAR"></result>
         <result column="gender" property="gender" jdbcType="VARCHAR"></result>
+        <result column="type" property="type" jdbcType="TINYINT"></result>
     </resultMap>
 
     <sql id="queryAdminParams">
@@ -322,14 +464,69 @@
                     <if test="queryAdminParams.name != null and queryAdminParams.name != ''">
                         and name like concat('%',#{queryAdminParams.name},'%')
                     </if>
+                    <if test="queryAdminParams.type != null">
+                        and type = #{queryAdminParams.type}
+                    </if>
                 </trim>
             </where>
         </if>
     </sql>
 
+    <sql id="queryPendingCoursesParams">
+        <if test="queryPendingCoursesParams != null">
+            <where>
+                <trim prefixOverrides="and">
+                    <if test="queryPendingCoursesParams.course != null and queryPendingCoursesParams.course != ''">
+                        course like concat('%',#{queryPendingCoursesParams.course},'%')
+                    </if>
+                    <if test="queryPendingCoursesParams.type != null">
+                        and type = #{queryPendingCoursesParams.type}
+                    </if>
+                    <if test="queryPendingCoursesParams.lecturerId != null">
+                        and lecturer_id = #{queryPendingCoursesParams.lecturerId}
+                    </if>
+                    <if test="queryPendingCoursesParams.lecturer != null and queryPendingCoursesParams.lecturer != ''">
+                        and lecturer like concat('%',#{queryPendingCoursesParams.lecturer},'%')
+                    </if>
+                    <if test="queryPendingCoursesParams.category != null and queryPendingCoursesParams.category != ''">
+                        and category = #{queryPendingCoursesParams.category}
+                    </if>
+                </trim>
+            </where>
+        </if>
+    </sql>
+
+    <resultMap id="pendingCoursesMap" type="com.plx.admin_system.entity.views.PendingCourse">
+        <result column="id" property="id" jdbcType="INTEGER"></result>
+        <result column="course" property="course" jdbcType="VARCHAR"></result>
+        <result column="type" property="type" jdbcType="TINYINT"></result>
+        <result column="category" property="category" jdbcType="VARCHAR"></result>
+        <result column="clazz" property="clazz" jdbcType="VARCHAR"></result>
+        <result column="semester" property="semester" jdbcType="VARCHAR"></result>
+        <result column="lecturer_id" property="lecturerId" jdbcType="INTEGER"></result>
+        <result column="lecturer" property="lecturer" jdbcType="VARCHAR"></result>
+        <result column="remark" property="remark" jdbcType="VARCHAR"></result>
+    </resultMap>
+
     <select id="getAdminList" resultMap="adminsMap,total">
         select sql_calc_found_rows *
-        from admin_list <include refid="queryAdminParams"></include> order by id asc limit #{pageNum}, #{pageSize};
+        from admin_list
+        <include refid="queryAdminParams"></include>
+        limit #{pageNum}, #{pageSize};
+        select found_rows() as total;
+    </select>
+    <select id="getGrantedTeacherList" resultMap="teachersMap,total">
+        select sql_calc_found_rows *
+        from granted_teachers
+        <include refid="queryTeacherParams"></include>
+        limit #{pageNum},#{pageSize};
+        select found_rows() as total;
+    </select>
+    <select id="getPendingCourses" resultMap="pendingCoursesMap,total">
+        select sql_calc_found_rows *
+        from pending_courses
+        <include refid="queryPendingCoursesParams"></include>
+        limit #{pageNum},#{pageSize};
         select found_rows() as total;
     </select>
 

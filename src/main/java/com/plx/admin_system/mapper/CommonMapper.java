@@ -63,4 +63,16 @@ public interface CommonMapper {
      */
     @MapKey("menuId")
     HashMap<Integer, Menu> getAdminMenu();
+    /**
+     * get revoked admin menu 获取被禁权管理员菜单
+     * @return HashMap
+     */
+    @MapKey("menuId")
+    HashMap<Integer, Menu> getRevokedAdminMenu();
+    /**
+     * get revoked admin menu 获取被禁权管理员菜单
+     * @return HashMap
+     */
+    @MapKey("menuId")
+    HashMap<Integer, Menu> getTeacherSuperAdminMenu();
 }

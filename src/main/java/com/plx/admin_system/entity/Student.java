@@ -54,4 +54,9 @@ public class Student extends User {
         super.setUserPassword(studentPassword);
         this.studentPassword = studentPassword;
     }
+
+    public void setStudentName(String studentName) {
+        super.setUserName(studentName);
+        this.studentName = studentName;
+    }
 }

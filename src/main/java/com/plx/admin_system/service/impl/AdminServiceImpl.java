@@ -1,5 +1,6 @@
 package com.plx.admin_system.service.impl;
 
+import cn.hutool.core.lang.hash.Hash;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.Student;
@@ -7,6 +8,7 @@ import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.AdminView;
+import com.plx.admin_system.entity.views.PendingCourse;
 import com.plx.admin_system.entity.views.StudentView;
 import com.plx.admin_system.entity.views.TeacherView;
 import com.plx.admin_system.mapper.AdminMapper;
@@ -28,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -91,11 +94,22 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
-        System.out.println(password);
         if (passwordEncoder.matches(password, loginUser.getPassword())) {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String getPermission() {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        if (Objects.nonNull(loginUser)) {
+            //默认权限最高的字符串在最后
+            Integer size = loginUser.getPermission().size();
+            return loginUser.getPermission().get(size - 1);
+        }
+        return null;
     }
 
     @Override
@@ -115,6 +129,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         student.setClazz("xx级计算机科学与技术x班(必填！！！)");
         student.setProfession("计算科学与技术(可以不填，系统会自动识别)");
         student.setDepartment("信息与工程学院(可以不填，系统会自动识别)");
+        student.setGrade("第四学年下学期(可以不填，系统会自动识别)");
         student.setGender("男/女");
         students.add(student);
         CommonUtils.exportData(StudentView.class, students, "学生信息表.xlsx", "学生列表",
@@ -179,6 +194,16 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     }
 
     @Override
+    public Boolean deleteNonAdminTeachers(List<Integer> id) {
+        return adminMapper.deleteNonAdminTeachers(id);
+    }
+
+    @Override
+    public Boolean deleteNonSuperAdminTeachers(List<Integer> id) {
+        return adminMapper.deleteNonSuperAdminTeachers(id);
+    }
+
+    @Override
     public void exportEmptyTeacherExcel(HttpServletResponse response) {
         List<TeacherView> teachers = new ArrayList<TeacherView>();
         TeacherView teacher = new TeacherView();
@@ -206,8 +231,8 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     }
 
     @Override
-    public Boolean grant(Integer id) {
-        return adminMapper.grant(id);
+    public Boolean grantTeacher(Integer id) {
+        return adminMapper.grantTeacher(id);
     }
 
     @Override
@@ -234,6 +259,89 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     @Override
     public Boolean resetAdminPassword(Integer id) {
         return adminMapper.resetAdminPassword(id);
+    }
+
+    @Override
+    public Boolean grantAdmin(Integer id) {
+        return adminMapper.grantAdmin(id);
+    }
+
+    @Override
+    public Boolean revokeAdminADay(Integer id) {
+        return adminMapper.revokeAdminADay(id);
+    }
+
+    @Override
+    public Boolean revokeAdmin(Integer id) {
+        return adminMapper.revokeAdmin(id);
+    }
+
+    @Override
+    public Boolean privilegeEscalationADay(Integer id) {
+        return adminMapper.privilegeEscalationADay(id);
+    }
+
+    @Override
+    public Boolean demotionRights(Integer id) {
+        return adminMapper.demotionRights(id);
+    }
+
+    @Override
+    public HashMap<String, Object> getGrantedTeacherList(TeacherView queryParams, Integer pageSize, Integer pageNum) {
+        List<List<?>> list = adminMapper.getGrantedTeacherList(queryParams, pageSize, pageNum);
+        HashMap<String, Object> result = new HashMap<>();
+        //已授权教师列表
+        result.put("list", list.get(0));
+        //数据条数
+        result.put("total", list.get(1).get(0));
+        return result;
+    }
+
+    @Override
+    public Boolean revokeTeacher(Integer id) {
+        return adminMapper.revokeTeacher(id);
+    }
+
+    @Override
+    public Boolean banTeacherADay(Integer id) {
+        return adminMapper.banTeacherADay(id);
+    }
+
+    @Override
+    public Boolean banTeacher(Integer id) {
+        return adminMapper.banTeacher(id);
+    }
+
+    @Override
+    public Boolean privilegeEscalationADay2(Integer id) {
+        return adminMapper.privilegeEscalationADay2(id);
+    }
+
+    @Override
+    public HashMap<String, Object> getPendingCourses(PendingCourse queryParams, Integer pageSize, Integer pageNum) {
+        List<List<?>> list = adminMapper.getPendingCourses(queryParams, pageSize, pageNum);
+        HashMap<String, Object> result = new HashMap<>();
+        //待审核课程列表
+        result.put("list", list.get(0));
+        //数据条数
+        result.put("total", list.get(1).get(0));
+        return result;
+    }
+
+    @Override
+    public Boolean rejectCourseRequest(Integer id) {
+        return adminMapper.rejectCourseRequest(id);
+    }
+
+    @Override
+    public ResponseResult passCourseRequest(PendingCourse course) {
+        try {
+            return adminMapper.passCourseRequest(course) ? new ResponseResult(HttpStatus.OK.value(), "通过成功") :
+                    new ResponseResult(HttpStatus.FORBIDDEN.value(), "通过失败，请联系管理人员");
+        }catch (Exception e){
+            adminMapper.rejectCourseRequest(course.getId());
+            return new ResponseResult(HttpStatus.FORBIDDEN.value(), "通过失败，该班级已经开设该课程，已自动否决");
+        }
     }
 }
 

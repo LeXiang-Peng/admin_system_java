@@ -43,16 +43,27 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 if (teacher.getIsAuthorized() == 1) {
                     list.add(CommonUtils.IDENTITY_ADMIN);
                 }
+                if (teacher.getIsAuthorized() == 2) {
+                    list.add(CommonUtils.IDENTITY_ADMIN);
+                    list.add(CommonUtils.IDENTITY_SUPER_ADMIN);
+                }
                 return new MyUserDetails(teacher, list);
             case CommonUtils.IDENTITY_ADMIN:
                 Admin admin = commonMapper.getOneAdminById(userId);
                 if (Objects.isNull(admin)) {
                     return null;
                 }
-                list.add(CommonUtils.IDENTITY_ADMIN);
+                if (admin.getAdminType() == 0) {
+                    list.add(CommonUtils.IDENTITY_ADMIN);
+                }
                 if (admin.getAdminType() == 1) {
+                    list.add(CommonUtils.IDENTITY_ADMIN);
                     list.add(CommonUtils.IDENTITY_SUPER_ADMIN);
                 }
+                if (admin.getAdminId() == 1) {
+                    list.add(CommonUtils.IDENTITY_PERMANENT_ADMIN);
+                }
+                System.out.println(list);
                 return new MyUserDetails(admin, list);
             default:
                 return null;

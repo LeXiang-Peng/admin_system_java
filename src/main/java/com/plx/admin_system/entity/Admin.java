@@ -48,4 +48,9 @@ public class Admin extends User {
         super.setUserPassword(adminPassword);
         this.adminPassword = adminPassword;
     }
+
+    public void setAdminName(String adminName) {
+        super.setUserName(adminName);
+        this.adminName = adminName;
+    }
 }

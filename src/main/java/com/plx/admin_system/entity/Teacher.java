@@ -54,4 +54,9 @@ public class Teacher extends User {
         super.setUserPassword(teacherPassword);
         this.teacherPassword = teacherPassword;
     }
+
+    public void setTeacherName(String teacherName) {
+        super.setUserName(teacherName);
+        this.teacherName = teacherName;
+    }
 }
