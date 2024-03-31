@@ -2,13 +2,11 @@ package com.plx.admin_system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.plx.admin_system.entity.Admin;
+import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.dto.ResponseResult;
-import com.plx.admin_system.entity.views.AdminView;
-import com.plx.admin_system.entity.views.PendingCourse;
-import com.plx.admin_system.entity.views.StudentView;
-import com.plx.admin_system.entity.views.TeacherView;
+import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.utils.pojo.selectedOptions.Options;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.web.multipart.MultipartFile;
@@ -341,4 +339,34 @@ public interface IAdminService extends IService<Admin> {
      * @return
      */
     ResponseResult passCourseRequest(PendingCourse course);
+
+    /**
+     * get to be scheduled courses 获得 待排课程列表
+     *
+     * @param queryParams ToBeScheduledCourses 查询条件
+     * @param pageSize    Integer 每一页展示的数据条数
+     * @param pageNum     Integer 从数据库的第pageNum开始显示
+     * @return
+     */
+    HashMap<String, Object> getToBeScheduledCourses(ToBeScheduledCourses queryParams,
+                                                    Integer pageSize,
+                                                    Integer pageNum);
+
+    /**
+     * get scheduled course 获取已编排的列表
+     * @param queryParams
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+    HashMap<String, Object> getScheduledCourse(ScheduledCourseTable queryParams,
+                                               Integer pageSize,
+                                               Integer pageNum);
+
+    /**
+     * get clazzs 获取选课的人群的专业
+     * @param id
+     * @return
+     */
+    List<String> getClazzs(Integer id);
 }

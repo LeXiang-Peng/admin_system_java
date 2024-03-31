@@ -1,16 +1,13 @@
 package com.plx.admin_system.service.impl;
 
-import cn.hutool.core.lang.hash.Hash;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.plx.admin_system.entity.Admin;
+import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.entity.dto.ResponseResult;
-import com.plx.admin_system.entity.views.AdminView;
-import com.plx.admin_system.entity.views.PendingCourse;
-import com.plx.admin_system.entity.views.StudentView;
-import com.plx.admin_system.entity.views.TeacherView;
+import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.mapper.AdminMapper;
 import com.plx.admin_system.security.password.UserAuthenticationToken;
 import com.plx.admin_system.service.IAdminService;
@@ -338,10 +335,37 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         try {
             return adminMapper.passCourseRequest(course) ? new ResponseResult(HttpStatus.OK.value(), "通过成功") :
                     new ResponseResult(HttpStatus.FORBIDDEN.value(), "通过失败，请联系管理人员");
-        }catch (Exception e){
+        } catch (Exception e) {
             adminMapper.rejectCourseRequest(course.getId());
             return new ResponseResult(HttpStatus.FORBIDDEN.value(), "通过失败，该班级已经开设该课程，已自动否决");
         }
+    }
+
+    @Override
+    public HashMap<String, Object> getToBeScheduledCourses(ToBeScheduledCourses queryParams, Integer pageSize, Integer pageNum) {
+        List<List<?>> list = adminMapper.getToBeScheduledCourses(queryParams, pageSize, pageNum);
+        HashMap<String, Object> result = new HashMap<>();
+        //待排课程列表
+        result.put("list", list.get(0));
+        //数据条数
+        result.put("total", list.get(1).get(0));
+        return result;
+    }
+
+    @Override
+    public HashMap<String, Object> getScheduledCourse(ScheduledCourseTable queryParams, Integer pageSize, Integer pageNum) {
+        List<List<?>> list = adminMapper.getScheduledCourse(queryParams, pageSize, pageNum);
+        HashMap<String, Object> result = new HashMap<>();
+        //待排课程列表
+        result.put("list", list.get(0));
+        //数据条数
+        result.put("total", list.get(1).get(0));
+        return result;
+    }
+
+    @Override
+    public List<String> getClazzs(Integer id) {
+        return adminMapper.getClazzs(id);
     }
 }
 

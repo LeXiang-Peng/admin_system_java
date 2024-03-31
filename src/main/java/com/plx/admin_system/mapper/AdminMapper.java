@@ -2,10 +2,12 @@ package com.plx.admin_system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.plx.admin_system.entity.Admin;
+import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.views.*;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -319,4 +321,41 @@ public interface AdminMapper extends BaseMapper<Admin> {
      * @return
      */
     Boolean passCourseRequest(PendingCourse course);
+
+    /**
+     * get to be scheduled courses 获得 待排课程列表
+     *
+     * @param queryToBeScheduledParams ToBeScheduledCourses 查询条件
+     * @param pageSize    Integer 每一页展示的数据条数
+     * @param pageNum     Integer 从数据库的第pageNum开始显示
+     * @return
+     */
+    List<List<?>> getToBeScheduledCourses(@Param("queryToBeScheduledParams")
+                                                  ToBeScheduledCourses queryToBeScheduledParams,
+                                          @Param("pageSize")
+                                                  Integer pageSize,
+                                          @Param("pageNum")
+                                                  Integer pageNum);
+
+    /**
+     * get scheduled course 获得 已排课程列表
+     *
+     * @param queryScheduledParams
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+    List<List<?>> getScheduledCourse(@Param("queryScheduledParams")
+                                             ScheduledCourseTable queryScheduledParams,
+                                     @Param("pageSize")
+                                             Integer pageSize,
+                                     @Param("pageNum")
+                                             Integer pageNum);
+
+    /**
+     * get clazzs 获取选课的人群的专业
+     * @param id
+     * @return
+     */
+    List<String> getClazzs(@Param("id") Integer id);
 }

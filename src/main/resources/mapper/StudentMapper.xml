@@ -2,56 +2,86 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.plx.admin_system.mapper.StudentMapper">
 
-    <resultMap id="studentCoursesMap" type="com.plx.admin_system.entity.views.PendingCourse">
+    <resultMap id="studentCoursesMap" type="com.plx.admin_system.entity.views.SelectedCourse">
         <result column="id" property="id" jdbcType="INTEGER"></result>
+        <result column="course_id" property="courseId" jdbcType="INTEGER"></result>
         <result column="course" property="course" jdbcType="VARCHAR"></result>
         <result column="type" property="type" jdbcType="TINYINT"></result>
         <result column="category" property="category" jdbcType="VARCHAR"></result>
         <result column="lecturer_id" property="lecturerId" jdbcType="INTEGER"></result>
         <result column="lecturer" property="lecturer" jdbcType="VARCHAR"></result>
+        <result column="semester" property="semester" jdbcType="VARCHAR"></result>
         <result column="hours" property="hours" jdbcType="INTEGER"></result>
         <result column="credits" property="credits" jdbcType="FLOAT"></result>
         <result column="remark" property="remark" jdbcType="VARCHAR"></result>
+        <result column="is_scheduled" property="isScheduled" jdbcType="TINYINT"></result>
     </resultMap>
 
-    <select id="getAllCourseList" resultMap="studentCoursesMap,studentCoursesMap">
+    <resultMap id="total3" type="Integer">
+        <result column="total" jdbcType="INTEGER" javaType="Integer"></result>
+    </resultMap>
+    <delete id="cancelCourse">
+        delete
+        from selected_course
+        where id = #{id}
+    </delete>
+
+    <select id="getAllCourseList" resultMap="studentCoursesMap,studentCoursesMap,total3">
         with info as
                  (
-                     select *
+                     select id, course_id
                      from selected_course
                      where student_id = #{id}
-                 ),
-             selected_course as
-                 (
-                     select course.course_id   as id,
-                            course.course_name as course,
-                            course_type        as type,
-                            course.category,
-                            lecturer_id,
-                            lecturer,
-                            hours,
-                            credits,
-                            remark
-                     from course,
-                          info
-                     where course.semester = info.semester
-                       and course.course_id = info.course_id
+                       and semester = (select current_semester
+                                       from student
+                                                left join clazz on
+                                           clazz.clazz_name = student.clazz_name
+                                       where student_id = #{id})
                  )
-        select *
-        from selected_course;
-
-        select course.course_id   as id,
+        select id,
+               course.course_id,
                course.course_name as course,
-               course_type        as type,
                course.category,
                lecturer_id,
                lecturer,
                hours,
                credits,
+               remark,
+               is_scheduled
+        from course,
+             info
+        where course.course_id = info.course_id;
+        with info as
+                 (
+                     select category
+                     from selected_course
+                     where student_id = #{id}
+                       and semester = (select current_semester
+                                       from student
+                                                left join clazz on
+                                           clazz.clazz_name = student.clazz_name
+                                       where student_id = #{id})
+                 )
+        select sql_calc_found_rows course.course_id, course.course_name as course,
+               course.category,
+               lecturer_id,
+               lecturer,
+               semester,
+               hours,
+               credits,
                remark
-        from selected_course,
-             course
-        where course.category &lt;&gt; selected_course.category;
-
+        from course
+                 left join info on info.category = course.category
+        where info.category is null
+          and course_type = 1
+            limit #{pageNum}, 5;
+        select found_rows() as total;
     </select>
+    <insert id="selectCourse">
+        insert into selected_course(course_id, course_name, category, student_id, student_name, clazz_name, semester)
+            value (#{courseId},#{course},#{category},#{studentId},#{student},
+            (select clazz_name from student where student_id = #{studentId}), #{semester})
+    </insert>
+
+
 </mapper>

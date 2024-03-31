@@ -1,16 +1,19 @@
- package com.plx.admin_system.controller;
+package com.plx.admin_system.controller;
 
- import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
- import com.plx.admin_system.entity.Student;
- import com.plx.admin_system.service.IStudentService;
- import org.springframework.web.bind.annotation.*;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.plx.admin_system.entity.Student;
+import com.plx.admin_system.entity.dto.ResponseResult;
+import com.plx.admin_system.entity.views.SelectedCourse;
+import com.plx.admin_system.service.IStudentService;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
- import javax.annotation.Resource;
- import java.util.List;
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author plx
@@ -22,25 +25,23 @@ public class StudentController {
     @Resource
     private IStudentService studentService;
 
-    @GetMapping
-    public List<Student> queryAll() {
-        return studentService.list();
+    @GetMapping("/course/list/{pageNum}")
+    public ResponseResult getCourseList(@PathVariable Integer pageNum) {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功",
+                studentService.getCourseList((pageNum - 1) * 5));
     }
-    @PostMapping("/saveOrUpdate")
-    public Boolean saveOrUpdate(@RequestBody Student student) {
-        return studentService.saveOrUpdate(student);
+
+    @GetMapping("/course/cancel/{id}")
+    public ResponseResult cancelCourse(@PathVariable Integer id) {
+        return studentService.cancelCourse(id) ? new ResponseResult(HttpStatus.OK.value(),
+                "取消成功", studentService.cancelCourse(id)) :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "取消失败，请联系管理人员");
     }
-    @DeleteMapping("/deleteOne/{id}")
-    public Boolean deleteOne(@PathVariable Integer id) {
-        return studentService.removeById(id);
-    }
-    @GetMapping("/queryOne/{id}")
-    public Student queryOne(@PathVariable Integer id) {
-        return studentService.getById(id);
-    }
-    @GetMapping("/pagingQuery")
-    public Page<Student> pagingQuery(@RequestParam Integer pageNum,
-                                    @RequestParam Integer pageSize){
-        return studentService.page(new Page<>(pageNum, pageSize));
+
+    @PostMapping("/course/select")
+    public ResponseResult selectCourse(@RequestBody SelectedCourse course) {
+        return studentService.selectCourse(course) ? new ResponseResult(HttpStatus.OK.value(),
+                "选择成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "选择失败，请联系管理人员");
     }
 }

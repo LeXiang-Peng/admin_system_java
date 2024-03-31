@@ -8,6 +8,7 @@ import cn.afterturn.easypoi.excel.entity.ImportParams;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.Menu;
 import com.plx.admin_system.entity.views.OptionsView;
+import com.plx.admin_system.utils.pojo.CourseTask;
 import com.plx.admin_system.utils.pojo.MenuList;
 import com.plx.admin_system.utils.pojo.selectedOptions.Clazz;
 import com.plx.admin_system.utils.pojo.selectedOptions.Options;
@@ -37,6 +38,11 @@ public class CommonUtils {
     public static final String IDENTITY_ADMIN = "admin";
     public static final String IDENTITY_SUPER_ADMIN = "admin+";
     public static final String IDENTITY_PERMANENT_ADMIN = "adminPlus";
+    private static final List<String> weekDays = Arrays.asList("周一", "周二", "周三", "周四", "周五");
+    /**
+     * expected ending week 期待20周内结束所有课程
+     */
+    private static final Float EXPECTED_ENDING_WEEK = 20.0F;
 
     public static String getRedisUserKey(String userId, String userName) {
         return PREFIX + userId + userName;
@@ -53,6 +59,7 @@ public class CommonUtils {
 
     /**
      * generate menu 生成多级菜单
+     * TODO 这里可以通过重写MyBatis xml文件自动映射成树形结构
      *
      * @param menuView
      * @return
@@ -93,6 +100,7 @@ public class CommonUtils {
 
     /**
      * generate options 生成多级选项菜单
+     * TODO 这里可以通过重写MyBatis xml文件自动映射成树形结构
      *
      * @param optionsViewList
      * @return
@@ -202,4 +210,32 @@ public class CommonUtils {
         sqlSession.close();
         return new ResponseResult(HttpStatus.OK.value(), "导入成功");
     }
+
+    /**
+     * init tasks 初始化课表任务队列
+     *
+     * @param tasks
+     * @param classroomListSize
+     * @return
+     */
+    public static List<CourseTask> initTasks(List<CourseTask> tasks) {
+        Integer length = tasks.size();
+        for (int i = 0; i < length; i++) {
+            CourseTask task = tasks.get(i);
+            Integer hours = tasks.get(i).getCourse().getHours();
+            double res = hours / EXPECTED_ENDING_WEEK;
+            Integer times = res >= 1 ? (int) Math.round(res) : (int) Math.ceil(res);
+            Integer total = hours / times / 2;
+            task.setTimesOnceAWeek(times);
+            task.setWeeksTotal(total);
+            task.setCurrentTime(1);
+            tasks.set(i, task);
+            for (int j = 1; j < times; j++) {
+                task.setCurrentTime(j + 1);
+                tasks.add(new CourseTask(task));
+            }
+        }
+        return tasks;
+    }
+
 }

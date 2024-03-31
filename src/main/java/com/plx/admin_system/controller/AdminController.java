@@ -1,14 +1,12 @@
 package com.plx.admin_system.controller;
 
 import com.plx.admin_system.entity.Admin;
+import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.dto.DeleteDto;
 import com.plx.admin_system.entity.dto.ResponseResult;
-import com.plx.admin_system.entity.views.AdminView;
-import com.plx.admin_system.entity.views.PendingCourse;
-import com.plx.admin_system.entity.views.StudentView;
-import com.plx.admin_system.entity.views.TeacherView;
+import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.service.IAdminService;
 import com.plx.admin_system.utils.CommonUtils;
 import org.springframework.http.HttpStatus;
@@ -301,5 +299,28 @@ public class AdminController {
     @PreAuthorize("hasAuthority('admin')")
     public ResponseResult getPendingCourses(@RequestBody PendingCourse queryParams) {
         return adminService.passCourseRequest(queryParams);
+    }
+
+    @PostMapping("/course/to/be/scheduled/{pageSize}/{pageNum}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getToBeScheduledCourse(@RequestBody(required = false) ToBeScheduledCourses queryParams,
+                                                 @PathVariable Integer pageSize, @PathVariable Integer pageNum) {
+        return new ResponseResult(HttpStatus.OK.value(), "查询成功",
+                adminService.getToBeScheduledCourses(queryParams, pageSize, (pageNum - 1) * pageSize));
+    }
+
+    @PostMapping("/course/scheduled/{pageSize}/{pageNum}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getScheduledCourse(@RequestBody(required = false) ScheduledCourseTable queryParams,
+                                             @PathVariable Integer pageSize, @PathVariable Integer pageNum) {
+        return new ResponseResult(HttpStatus.OK.value(), "查询成功",
+                adminService.getScheduledCourse(queryParams, pageSize, (pageNum - 1) * pageSize));
+    }
+
+    @GetMapping("/course/clazz/{id}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getClazzs(@PathVariable Integer id) {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功",
+                adminService.getClazzs(id));
     }
 }

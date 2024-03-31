@@ -20,5 +20,4 @@ public class PendingCourse {
     private Float credits;
     private String semester;
     private String remark;
-    private Byte isScheduled;
 }

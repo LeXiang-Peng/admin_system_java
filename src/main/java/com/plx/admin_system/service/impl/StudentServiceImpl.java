@@ -2,13 +2,21 @@ package com.plx.admin_system.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.plx.admin_system.entity.Student;
+import com.plx.admin_system.entity.dto.MyUserDetails;
+import com.plx.admin_system.entity.views.SelectedCourse;
 import com.plx.admin_system.mapper.StudentMapper;
+import com.plx.admin_system.security.password.UserAuthenticationToken;
 import com.plx.admin_system.service.IStudentService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author plx
@@ -16,5 +24,33 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> implements IStudentService {
+    @Resource
+    StudentMapper studentMapper;
+
+    @Override
+    public HashMap<String, Object> getCourseList(Integer pageNum) {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        List<List<?>> list = studentMapper.getAllCourseList(loginUser.getUserId(), pageNum);
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("selected_course", list.get(0));
+        result.put("available_course", list.get(1));
+        result.put("total", list.get(2).get(0));
+        return result;
+    }
+
+    @Override
+    public Boolean cancelCourse(Integer id) {
+        return studentMapper.cancelCourse(id);
+    }
+
+    @Override
+    public Boolean selectCourse(SelectedCourse course) {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        course.setStudentId(loginUser.getUserId());
+        course.setStudent(loginUser.getUsername());
+        return studentMapper.selectCourse(course);
+    }
 
 }

@@ -529,5 +529,91 @@
         limit #{pageNum},#{pageSize};
         select found_rows() as total;
     </select>
+    <resultMap id="toBeScheduledCoursesMap" type="com.plx.admin_system.entity.views.ToBeScheduledCourses">
+        <result column="id" property="id" jdbcType="INTEGER"></result>
+        <result column="course" property="course" jdbcType="VARCHAR"></result>
+        <result column="type" property="type" jdbcType="TINYINT"></result>
+        <result column="category" property="category" jdbcType="VARCHAR"></result>
+        <result column="semester" property="semester" jdbcType="VARCHAR"></result>
+        <result column="lecturer_id" property="lecturerId" jdbcType="INTEGER"></result>
+        <result column="lecturer" property="lecturer" jdbcType="VARCHAR"></result>
+        <result column="student_total" property="studentTotal" jdbcType="INTEGER"></result>
+        <result column="clazz" property="clazz" jdbcType="VARCHAR"></result>
+    </resultMap>
 
+    <sql id="queryToBeScheduledParams">
+        <if test="queryToBeScheduledParams != null">
+            <where>
+                <trim prefixOverrides="and">
+                    <if test="queryToBeScheduledParams.course != null and queryToBeScheduledParams.course != ''">
+                        course like concat('%',#{queryToBeScheduledParams.course},'%')
+                    </if>
+                    <if test="queryToBeScheduledParams.type != null">
+                        and type = #{queryToBeScheduledParams.type}
+                    </if>
+                    <if test="queryToBeScheduledParams.lecturerId != null">
+                        and lecturer_id = #{queryToBeScheduledParams.lecturerId}
+                    </if>
+                    <if test="queryToBeScheduledParams.lecturer != null and queryToBeScheduledParams.lecturer != ''">
+                        and lecturer like concat('%',#{queryToBeScheduledParams.lecturer},'%')
+                    </if>
+                    <if test="queryToBeScheduledParams.category != null and queryToBeScheduledParams.category != ''">
+                        and category = #{queryToBeScheduledParams.category}
+                    </if>
+                </trim>
+            </where>
+        </if>
+    </sql>
+
+    <resultMap id="ScheduledCoursesMap" type="com.plx.admin_system.entity.ScheduledCourseTable">
+        <result column="scheduled_course_id" property="scheduledCourseId" jdbcType="INTEGER"></result>
+        <result column="course_id" property="courseId" jdbcType="INTEGER"></result>
+        <result column="course_name" property="courseName" jdbcType="VARCHAR"></result>
+        <result column="lecturer_id" property="lecturerId" jdbcType="INTEGER"></result>
+        <result column="lecturer" property="lecturer" jdbcType="VARCHAR"></result>
+        <result column="classroom_name" property="classroomName" jdbcType="VARCHAR"></result>
+        <result column="building_name" property="buildingName" jdbcType="VARCHAR"></result>
+        <result column="weekday" property="weekDay" jdbcType="VARCHAR"></result>
+        <result column="course_time" property="courseTime" jdbcType="INTEGER"></result>
+        <result column="semester" property="semester" jdbcType="VARCHAR"></result>
+    </resultMap>
+
+    <sql id="queryScheduledParams">
+        <if test="queryScheduledParams != null">
+            <where>
+                <trim prefixOverrides="and">
+                    <if test="queryScheduledParams.courseName != null and queryScheduledParams.courseName != ''">
+                        course_name like concat('%',#{queryScheduledParams.courseName},'%')
+                    </if>
+                    <if test="queryScheduledParams.lecturerId != null">
+                        and lecturer_id = #{queryScheduledParams.lecturerId}
+                    </if>
+                    <if test="queryScheduledParams.lecturer != null and queryScheduledParams.lecturer != ''">
+                        and lecturer like concat('%',#{queryScheduledParams.lecturer},'%')
+                    </if>
+                </trim>
+            </where>
+        </if>
+    </sql>
+
+    <select id="getToBeScheduledCourses" resultMap="toBeScheduledCoursesMap,total">
+        select sql_calc_found_rows *
+        from to_be_scheduled_courses
+        <include refid="queryToBeScheduledParams"></include>
+        limit #{pageNum},#{pageSize};
+        select found_rows() as total;
+    </select>
+    <select id="getScheduledCourse" resultMap="ScheduledCoursesMap,total">
+        select sql_calc_found_rows *
+        from scheduled_course
+        <include refid="queryScheduledParams"></include>
+        limit #{pageNum},#{pageSize};
+        select found_rows() as total;
+    </select>
+    <select id="getClazzs" resultType="java.lang.String">
+        select clazz_name as clazz
+        from selected_course
+        where course_id = #{id}
+        group by clazz_name
+    </select>
 </mapper>
