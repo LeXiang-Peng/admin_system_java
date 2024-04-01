@@ -1,4 +1,4 @@
-package com.plx.admin_system.utils.pojo;
+package com.plx.admin_system.utils.pojo.schduledCourse;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +20,7 @@ public class CourseTask {
     private Integer weeksTotal;
     private Integer timesOnceAWeek;
     private Integer currentTime;
+    private Integer totalTimes;
     /**
      * 0 - 周一 ...4 - 周五
      */
@@ -40,6 +41,7 @@ public class CourseTask {
         this.weeksTotal = task.getWeeksTotal();
         this.timesOnceAWeek = task.getTimesOnceAWeek();
         this.currentTime = task.getCurrentTime();
+        this.totalTimes = task.getTotalTimes();
     }
 
     /**
@@ -52,6 +54,19 @@ public class CourseTask {
         this.classroom = random.nextInt(classroomListSize);
         this.weekDay = random.nextInt(5);
         this.course_time = random.nextInt(4);
+    }
+
+    /**
+     * same course during same day 同一天有两门相同的课程
+     *
+     * @param task
+     * @return
+     */
+    public Boolean SameCourseDuringSameDay(CourseTask task) {
+        if (this.courseOverlaps(task) && duringSameDay(task)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -112,6 +127,19 @@ public class CourseTask {
     }
 
     /**
+     * during same day 同一天
+     *
+     * @param task
+     * @return
+     */
+    private Boolean duringSameDay(CourseTask task) {
+        if (Objects.equals(this.weekDay, task.weekDay)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * student total overflows 学生人数是否超过教室最大容量
      *
      * @return
@@ -155,8 +183,12 @@ public class CourseTask {
      * @return
      */
     private Boolean clazzOverlaps(CourseTask task) {
-        if (Objects.equals(this.course.getClazzList(), task.getCourse().getClazzList())) {
-            return true;
+        for (String cur_clazz : this.course.getClazzList()) {
+            for (String task_clazz : task.course.getClazzList()) {
+                if (Objects.equals(cur_clazz, task_clazz)) {
+                    return true;
+                }
+            }
         }
         return false;
     }

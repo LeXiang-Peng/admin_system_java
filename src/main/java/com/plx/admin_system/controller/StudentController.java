@@ -1,7 +1,5 @@
 package com.plx.admin_system.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.SelectedCourse;
 import com.plx.admin_system.service.IStudentService;
@@ -9,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * <p>
@@ -43,5 +40,10 @@ public class StudentController {
         return studentService.selectCourse(course) ? new ResponseResult(HttpStatus.OK.value(),
                 "选择成功") :
                 new ResponseResult(HttpStatus.FORBIDDEN.value(), "选择失败，请联系管理人员");
+    }
+
+    @GetMapping("/course/table/{current_week}")
+    public ResponseResult getCourseTable(@PathVariable("current_week") Integer currentWeek) {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功", studentService.getCourseTable(currentWeek));
     }
 }

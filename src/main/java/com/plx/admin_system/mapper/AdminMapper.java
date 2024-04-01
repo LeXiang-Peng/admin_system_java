@@ -6,8 +6,10 @@ import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.views.*;
+import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
+import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
+import com.plx.admin_system.utils.pojo.schduledCourse.SchedulingCourse;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -326,8 +328,8 @@ public interface AdminMapper extends BaseMapper<Admin> {
      * get to be scheduled courses 获得 待排课程列表
      *
      * @param queryToBeScheduledParams ToBeScheduledCourses 查询条件
-     * @param pageSize    Integer 每一页展示的数据条数
-     * @param pageNum     Integer 从数据库的第pageNum开始显示
+     * @param pageSize                 Integer 每一页展示的数据条数
+     * @param pageNum                  Integer 从数据库的第pageNum开始显示
      * @return
      */
     List<List<?>> getToBeScheduledCourses(@Param("queryToBeScheduledParams")
@@ -354,8 +356,33 @@ public interface AdminMapper extends BaseMapper<Admin> {
 
     /**
      * get clazzs 获取选课的人群的专业
+     *
      * @param id
      * @return
      */
     List<String> getClazzs(@Param("id") Integer id);
+
+    /**
+     * insert tasks
+     * 将遗传学算法生成的课程表批量插入至数据库中
+     *
+     * @param task
+     * @param course
+     * @param courseTime
+     * @param weekDay
+     * @param roomInfo
+     * @return
+     */
+    Integer insertTasks(@Param("task") CourseTask task, @Param("course") SchedulingCourse course,
+                        @Param("courseTime") String courseTime, @Param("weekDay") String weekDay,
+                        @Param("roomInfo") ClassroomInfo roomInfo);
+
+    /**
+     * update course info 排课之后批量更新课程is_scheduled 字段
+     *
+     * @param id
+     * @return
+     */
+    Boolean updateCourseInfo(@Param("id") Integer id);
+
 }

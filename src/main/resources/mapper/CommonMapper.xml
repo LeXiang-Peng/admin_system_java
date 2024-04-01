@@ -51,9 +51,9 @@
         from teacher_superadmin_menu
     </select>
 
-    <resultMap id="tobeScheduledCourseInfoMap" type="com.plx.admin_system.utils.pojo.CourseTask">
+    <resultMap id="tobeScheduledCourseInfoMap" type="com.plx.admin_system.utils.pojo.schduledCourse.CourseTask">
         <id column="course_id" property="id" jdbcType="INTEGER"></id>
-        <association property="course" javaType="com.plx.admin_system.utils.pojo.SchedulingCourse">
+        <association property="course" javaType="com.plx.admin_system.utils.pojo.schduledCourse.SchedulingCourse">
             <id column="course_id" property="courseId" jdbcType="INTEGER"></id>
             <result column="course_name" property="course" jdbcType="VARCHAR"></result>
             <result column="lecturer_id" property="lecturerId" jdbcType="INTEGER"></result>
@@ -72,9 +72,33 @@
         select *
         from to_be_scheduled_course_info
     </select>
-    <select id="getClassroomList" resultType="com.plx.admin_system.utils.pojo.Classroom">
-        select classroom_name as classroom, building_name as building, capacity
-        from classroom limit #{pageNum},#{pageSize}
+
+    <resultMap id="classroomsMap" type="com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo">
+        <result column="classroom_name" property="classroomName" jdbcType="VARCHAR"></result>
+        <result column="building_name" property="buildingName" jdbcType="VARCHAR"></result>
+        <result column="capacity" property="capacity" jdbcType="INTEGER"></result>
+    </resultMap>
+
+    <resultMap id="_total" type="Integer">
+        <result column="total" jdbcType="INTEGER" javaType="Integer"></result>
+    </resultMap>
+
+    <select id="getAllClassroom" resultMap="classroomsMap,_total">
+        select sql_calc_found_rows classroom_name, building_name, capacity
+        from classroom;
+        select found_rows() as total;
     </select>
+
+    <delete id="resetCourseTable">
+        update course
+        set is_scheduled =0
+        where !is_completed;
+        delete
+        from scheduled_course
+        where scheduled_course.course_id in
+              (select course.course_id
+               from course
+               where !is_completed)
+    </delete>
 
 </mapper>

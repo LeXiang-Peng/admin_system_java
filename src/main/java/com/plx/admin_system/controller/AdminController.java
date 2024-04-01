@@ -323,4 +323,9 @@ public class AdminController {
         return new ResponseResult(HttpStatus.OK.value(), "获取成功",
                 adminService.getClazzs(id));
     }
+
+    @GetMapping("/course/generate/ga")
+    public ResponseResult generateCourseTableByGA(){
+        return adminService.arrangeCourseTableByGA();
+    }
 }

@@ -9,9 +9,13 @@ import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.mapper.AdminMapper;
+import com.plx.admin_system.mapper.CommonMapper;
 import com.plx.admin_system.security.password.UserAuthenticationToken;
 import com.plx.admin_system.service.IAdminService;
 import com.plx.admin_system.utils.CommonUtils;
+import com.plx.admin_system.utils.GeneticAlgorithm;
+import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
+import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
 import com.plx.admin_system.utils.pojo.selectedOptions.Options;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
@@ -41,6 +45,8 @@ import java.util.Objects;
 public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements IAdminService {
     @Resource
     AdminMapper adminMapper;
+    @Resource
+    CommonMapper commonMapper;
 
     @Override
     public HashMap<String, Object> getStudentList(StudentView queryParams, Integer pageSize, Integer pageNum) {
@@ -144,7 +150,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         AdminMapper mapper = sqlSession.getMapper(AdminMapper.class);
         //批处理
         students.stream().forEach(student -> mapper.newStudents(student));
-        return CommonUtils.commit(sqlSession);
+        return CommonUtils.commit(sqlSession, "导入成功", "文件信息有误，请重新上传");
     }
 
     @Override
@@ -224,7 +230,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         AdminMapper mapper = sqlSession.getMapper(AdminMapper.class);
         //批处理
         teachers.stream().forEach(teacher -> mapper.newTeachers(teacher));
-        return CommonUtils.commit(sqlSession);
+        return CommonUtils.commit(sqlSession, "导入成功", "文件信息有误，请重新上传");
     }
 
     @Override
@@ -366,6 +372,32 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     @Override
     public List<String> getClazzs(Integer id) {
         return adminMapper.getClazzs(id);
+    }
+
+    @Override
+    public ResponseResult arrangeCourseTableByGA() {
+        //重置之前排好的课程
+        commonMapper.resetCourseTable();
+        GeneticAlgorithm algorithm = new GeneticAlgorithm();
+        List<List<?>> list = commonMapper.getAllClassroom();
+        List<CourseTask> tasks = CommonUtils.initTasks(commonMapper.getToBeScheduledCourse());
+        List<ClassroomInfo> classroomInfoList = (List<ClassroomInfo>) list.get(0);
+        Integer classroomListSize = (Integer) list.get(1).get(0);
+        tasks = algorithm.evolute(tasks, classroomListSize);
+        if (tasks.size() == 0) {
+            return new ResponseResult(HttpStatus.NOT_IMPLEMENTED.value(), "生成失败，请重新生成");
+        }
+        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+        AdminMapper mapper = sqlSession.getMapper(AdminMapper.class);
+        //批处理
+        tasks.stream().forEach(item -> {
+            String weekDay = CommonUtils.WEEKDAYS.get(item.getWeekDay());
+            String courseTime = CommonUtils.COURSE_TIME.get(item.getCourse_time());
+            ClassroomInfo roomInfo = classroomInfoList.get(item.getClassroom());
+            mapper.insertTasks(item, item.getCourse(), courseTime, weekDay, roomInfo);
+            mapper.updateCourseInfo(item.getId());
+        });
+        return CommonUtils.commit(sqlSession, "生成成功", "生成失败，请重新生成");
     }
 }
 

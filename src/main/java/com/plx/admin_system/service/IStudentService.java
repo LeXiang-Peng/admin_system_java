@@ -5,6 +5,8 @@ import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.views.SelectedCourse;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -37,4 +39,10 @@ public interface IStudentService extends IService<Student> {
      */
     Boolean selectCourse(SelectedCourse course);
 
+    /**
+     * get course table 获取课程列表
+     *
+     * @return
+     */
+    List<Map> getCourseTable(Integer currentWeek);
 }

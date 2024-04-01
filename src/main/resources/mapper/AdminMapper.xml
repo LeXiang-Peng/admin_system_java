@@ -309,6 +309,11 @@
         set status = 2
         where approvaling_course_id = #{id}
     </update>
+    <update id="updateCourseInfo">
+        update course
+        set is_scheduled = 1
+        where course_id = #{id};
+    </update>
 
     <sql id="courseKey">
         <if test="clazz != null and clazz != ''">
@@ -344,6 +349,15 @@
         where approvaling_course_id = #{id};
         insert into course(<include refid="courseKey"></include>)
         value(<include refid="courseValue"></include>);
+    </insert>
+
+    <insert id="insertTasks">
+        insert into scheduled_course(course_id, course_name, lecturer_id, lecturer, classroom_name, building_name,
+                                     weekday, course_time, semester, weeks_total, times_once_a_week, current_times,
+                                     total_times)
+            value (#{task.id}, #{course.course}, #{course.lecturerId}, #{course.lecturer}, #{roomInfo.classroomName},
+            #{roomInfo.buildingName}, #{weekDay}, #{courseTime}, #{course.semester}, #{task.weeksTotal},
+            #{task.timesOnceAWeek}, #{task.currentTime}, #{task.totalTimes});
     </insert>
 
 
@@ -392,6 +406,7 @@
         limit #{pageNum}, #{pageSize};
         select found_rows() as total;
     </select>
+
 
     <select id="getOptionsView" resultType="com.plx.admin_system.entity.views.OptionsView">
         select *
@@ -579,21 +594,20 @@
     </resultMap>
 
     <sql id="queryScheduledParams">
-        <if test="queryScheduledParams != null">
-            <where>
-                <trim prefixOverrides="and">
-                    <if test="queryScheduledParams.courseName != null and queryScheduledParams.courseName != ''">
-                        course_name like concat('%',#{queryScheduledParams.courseName},'%')
-                    </if>
-                    <if test="queryScheduledParams.lecturerId != null">
-                        and lecturer_id = #{queryScheduledParams.lecturerId}
-                    </if>
-                    <if test="queryScheduledParams.lecturer != null and queryScheduledParams.lecturer != ''">
-                        and lecturer like concat('%',#{queryScheduledParams.lecturer},'%')
-                    </if>
-                </trim>
-            </where>
-        </if>
+        <where>
+            !course.is_completed
+            <if test="queryScheduledParams != null">
+                <if test="queryScheduledParams.courseName != null and queryScheduledParams.courseName != ''">
+                    and scheduled_course.course_name like concat('%',#{queryScheduledParams.courseName},'%')
+                </if>
+                <if test="queryScheduledParams.lecturerId != null">
+                    and scheduled_course.lecturer_id = #{queryScheduledParams.lecturerId}
+                </if>
+                <if test="queryScheduledParams.lecturer != null and queryScheduledParams.lecturer != ''">
+                    and scheduled_course.lecturer like concat('%',#{queryScheduledParams.lecturer},'%')
+                </if>
+            </if>
+        </where>
     </sql>
 
     <select id="getToBeScheduledCourses" resultMap="toBeScheduledCoursesMap,total">
@@ -604,10 +618,12 @@
         select found_rows() as total;
     </select>
     <select id="getScheduledCourse" resultMap="ScheduledCoursesMap,total">
-        select sql_calc_found_rows *
+        select sql_calc_found_rows scheduled_course.*
         from scheduled_course
+        left join course
+        on course.course_id = scheduled_course.course_id
         <include refid="queryScheduledParams"></include>
-        limit #{pageNum},#{pageSize};
+        limit #{pageNum}, #{pageSize};
         select found_rows() as total;
     </select>
     <select id="getClazzs" resultType="java.lang.String">

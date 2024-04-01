@@ -1,6 +1,7 @@
 package com.plx.admin_system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.views.SelectedCourse;
 import org.apache.ibatis.annotations.Param;
@@ -39,4 +40,11 @@ public interface StudentMapper extends BaseMapper<Student> {
      */
     Boolean selectCourse(SelectedCourse course);
 
+    /**
+     * get course table 获取课程列表
+     *
+     * @param id
+     * @return
+     */
+    List<ScheduledCourseTable> getCourseTable(@Param("id") Integer id);
 }

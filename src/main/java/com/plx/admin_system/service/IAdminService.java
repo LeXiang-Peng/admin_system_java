@@ -369,4 +369,10 @@ public interface IAdminService extends IService<Admin> {
      * @return
      */
     List<String> getClazzs(Integer id);
+
+    /**
+     * arrange course table by genetic algorithm 通过遗传学算法排课
+     * @return
+     */
+    ResponseResult arrangeCourseTableByGA();
 }

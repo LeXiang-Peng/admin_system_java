@@ -5,17 +5,19 @@ import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
+import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.Menu;
 import com.plx.admin_system.entity.views.OptionsView;
-import com.plx.admin_system.utils.pojo.CourseTask;
 import com.plx.admin_system.utils.pojo.MenuList;
+import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
 import com.plx.admin_system.utils.pojo.selectedOptions.Clazz;
 import com.plx.admin_system.utils.pojo.selectedOptions.Options;
 import com.plx.admin_system.utils.pojo.selectedOptions.Profession;
 import io.jsonwebtoken.Claims;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,7 +40,8 @@ public class CommonUtils {
     public static final String IDENTITY_ADMIN = "admin";
     public static final String IDENTITY_SUPER_ADMIN = "admin+";
     public static final String IDENTITY_PERMANENT_ADMIN = "adminPlus";
-    private static final List<String> weekDays = Arrays.asList("周一", "周二", "周三", "周四", "周五");
+    public static final List<String> WEEKDAYS = Arrays.asList("周一", "周二", "周三", "周四", "周五");
+    public static final List<String> COURSE_TIME = Arrays.asList("第一大节", "第二大节", "第三大节", "第四大节");
     /**
      * expected ending week 期待20周内结束所有课程
      */
@@ -59,7 +62,6 @@ public class CommonUtils {
 
     /**
      * generate menu 生成多级菜单
-     * TODO 这里可以通过重写MyBatis xml文件自动映射成树形结构
      *
      * @param menuView
      * @return
@@ -197,25 +199,24 @@ public class CommonUtils {
      * @param sqlSession
      * @return
      */
-    public static ResponseResult commit(SqlSession sqlSession) {
+    public static ResponseResult commit(SqlSession sqlSession, String successMessage, String failMessage) {
         try {
             sqlSession.commit();
         } catch (Exception e) {
             sqlSession.rollback();
             sqlSession.clearCache();
             sqlSession.close();
-            return new ResponseResult(HttpStatus.FORBIDDEN.value(), "文件内容有误，请重新上传");
+            return new ResponseResult(HttpStatus.FORBIDDEN.value(), failMessage);
         }
         sqlSession.clearCache();
         sqlSession.close();
-        return new ResponseResult(HttpStatus.OK.value(), "导入成功");
+        return new ResponseResult(HttpStatus.OK.value(), successMessage);
     }
 
     /**
      * init tasks 初始化课表任务队列
      *
      * @param tasks
-     * @param classroomListSize
      * @return
      */
     public static List<CourseTask> initTasks(List<CourseTask> tasks) {
@@ -224,10 +225,12 @@ public class CommonUtils {
             CourseTask task = tasks.get(i);
             Integer hours = tasks.get(i).getCourse().getHours();
             double res = hours / EXPECTED_ENDING_WEEK;
-            Integer times = res >= 1 ? (int) Math.round(res) : (int) Math.ceil(res);
-            Integer total = hours / times / 2;
+            Integer times = res >= 1 ? (int) Math.round(res - 0.2) : (int) Math.ceil(res);
+            Integer total_times = (int) Math.ceil(hours / 2.0F);
+            Integer weeks_total = (int) Math.ceil(hours / 2.0F / times);
+            task.setTotalTimes(total_times);
             task.setTimesOnceAWeek(times);
-            task.setWeeksTotal(total);
+            task.setWeeksTotal(weeks_total);
             task.setCurrentTime(1);
             tasks.set(i, task);
             for (int j = 1; j < times; j++) {
@@ -238,4 +241,109 @@ public class CommonUtils {
         return tasks;
     }
 
+    public static List<Map> generateJsonCourse(List<ScheduledCourseTable> courseTableList) {
+        List<Map> res = initMap();
+        List list;
+        for (ScheduledCourseTable courseTable : courseTableList) {
+            switch (courseTable.getCourseTime()) {
+                case "第一大节":
+                    list = getJson(courseTable);
+                    res.get(0).put(list.get(0), list.get(1));
+                    break;
+                case "第二大节":
+                    list = getJson(courseTable);
+                    res.get(1).put(list.get(0), list.get(1));
+                    break;
+                case "第三大节":
+                    list = getJson(courseTable);
+                    res.get(2).put(list.get(0), list.get(1));
+                    break;
+                case "第四大节":
+                    list = getJson(courseTable);
+                    res.get(3).put(list.get(0), list.get(1));
+                    break;
+                case "第五大节":
+                    list = getJson(courseTable);
+                    res.get(4).put(list.get(0), list.get(1));
+                    break;
+                default:
+                    break;
+            }
+        }
+        return res;
+    }
+
+    private static List<Map> initMap() {
+        List<Map> list = new ArrayList<>();
+
+        Map map = new HashMap();
+        map.put("head", "第一小节");
+        map.put("head_time", "8:00 —— 8:45");
+        map.put("tail", "第二小节");
+        map.put("tail_time", "8:55 —— 9:40");
+
+        list.add(map);
+        map = new HashMap();
+        map.put("head", "第三小节");
+        map.put("head_time", "9:50 —— 10:45");
+        map.put("tail", "第四小节");
+        map.put("tail_time", "11:00 —— 11:45");
+        list.add(map);
+        map = new HashMap();
+        map.put("head", "第五小节");
+        map.put("head_time", "14:00  —— 14:45");
+        map.put("tail", "第六小节");
+        map.put("tail_time", "15:00 —— 15:45");
+        list.add(map);
+        map = new HashMap();
+        map.put("head", "第七小节");
+        map.put("head_time", "16:00  —— 16:45");
+        map.put("tail", "第八小节");
+        map.put("tail_time", "17:00 —— 17:45");
+        list.add(map);
+        map = new HashMap();
+        map.put("head_time", "18:50 - 20:30");
+        list.add(map);
+        return list;
+    }
+
+    private static List getJson(ScheduledCourseTable courseTable) {
+        List res = new ArrayList();
+        Map json = new HashMap();
+        json.put("course", courseTable.getCourseName());
+        json.put("classroom", courseTable.getBuildingName() + courseTable.getClassroomName());
+        json.put("lecturer", courseTable.getLecturer());
+        switch (courseTable.getWeekDay()) {
+            case "周一":
+                res.add("monday");
+                res.add(json);
+                return res;
+            case "周二":
+                res.add("tuesday");
+                res.add(json);
+                return res;
+            case "周三":
+                res.add("wednesday");
+                res.add(json);
+                return res;
+            case "周四":
+                res.add("thursday");
+                res.add(json);
+                return res;
+            case "周五":
+                res.add("friday");
+                res.add(json);
+                return res;
+            case "周六":
+                res.add("saturday");
+                res.add(json);
+                return res;
+            case "周日":
+                res.add("sunday");
+                res.add(json);
+                return res;
+            default:
+                return null;
+        }
+    }
 }

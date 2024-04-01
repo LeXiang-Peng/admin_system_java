@@ -1,4 +1,4 @@
-package com.plx.admin_system.utils.pojo;
+package com.plx.admin_system.utils.pojo.schduledCourse;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import lombok.Data;
  * @author plx
  */
 @Data
-public class ClazzInfo {
+public class ClassroomInfo {
     private String classroomName;
     private String buildingName;
     private Integer capacity;

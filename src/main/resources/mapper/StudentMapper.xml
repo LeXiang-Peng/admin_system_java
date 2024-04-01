@@ -74,8 +74,26 @@
                  left join info on info.category = course.category
         where info.category is null
           and course_type = 1
-            limit #{pageNum}, 5;
+            limit #{pageNum}
+            , 5;
         select found_rows() as total;
+    </select>
+    <select id="getCourseTable" resultType="com.plx.admin_system.entity.ScheduledCourseTable">
+        with info as
+                 (
+                     select course_id
+                     from course
+                     where course.clazz_name =
+                           (select clazz_name from student where student_id = #{id})
+                     union all
+                     select course_id
+                     from selected_course
+                     where student_id = #{id}
+                 )
+        select scheduled_course.*
+        from info
+        left join scheduled_course
+        on scheduled_course.course_id = info.course_id;
     </select>
     <insert id="selectCourse">
         insert into selected_course(course_id, course_name, category, student_id, student_name, clazz_name, semester)

@@ -4,10 +4,8 @@ import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.views.Menu;
-import com.plx.admin_system.utils.pojo.Classroom;
-import com.plx.admin_system.utils.pojo.CourseTask;
-import com.plx.admin_system.utils.pojo.SchedulingCourse;
-import io.swagger.models.auth.In;
+import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
+import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 
@@ -107,9 +105,17 @@ public interface CommonMapper {
     List<CourseTask> getToBeScheduledCourse();
 
     /**
-     * @param pageSize
-     * @param pageNum
+     * get all classroom 获取所有教室信息
+     *
      * @return
      */
-    List<Classroom> getClassroomList(@Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
+    List<List<?>> getAllClassroom();
+
+    /**
+     * reset course table
+     * 重置课表，便于之后再排课
+     *
+     * @return
+     */
+    Boolean resetCourseTable();
 }

@@ -1,6 +1,6 @@
 package com.plx.admin_system.utils;
 
-import com.plx.admin_system.utils.pojo.CourseTask;
+import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
 
 import java.util.*;
 
@@ -25,7 +25,7 @@ public class GeneticAlgorithm {
      */
     private static final Integer MAX_ITERATION = 500;
     /**
-     * 所有的种群 每一个种群中存放需要编排的课程列表
+     * 所有的种群 种群中 存放每一个 **需要编排的课程列表** (个体)
      */
     private List<List<CourseTask>> population;
 
@@ -50,8 +50,10 @@ public class GeneticAlgorithm {
             }
             while (newPopulation.size() < POPULATION_SIZE) {
                 if (Math.random() < MUTATION_PROBABILITY) {
+                    //将变异个体加入种群中
                     newPopulation.add(_mutate(newPopulation, classroomListSize));
                 } else {
+                    //通过两个精英个体进行交叉
                     _crossOver(newPopulation);
                 }
             }
@@ -102,8 +104,8 @@ public class GeneticAlgorithm {
                 if (individual.get(i).studentTotalOverflows()) {
                     conflicts++;
                 }
+                gene = individual.get(i);
                 for (int j = i + 1; j < courseSize; j++) {
-                    gene = individual.get(i);
                     _gene = individual.get(j);
                     if (gene.courseOverlapsDuringSameTime(_gene)) {
                         conflicts++;
@@ -112,6 +114,9 @@ public class GeneticAlgorithm {
                         conflicts++;
                     }
                     if (gene.lecturerOverlapsDuringSameTime(_gene)) {
+                        conflicts++;
+                    }
+                    if (gene.SameCourseDuringSameDay(_gene)) {
                         conflicts++;
                     }
                 }

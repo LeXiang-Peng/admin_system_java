@@ -14,7 +14,7 @@ public class ScheduledCourseTable {
     private Integer courseId;
     @JsonProperty("course")
     private String courseName;
-    @JsonProperty("lecture_id")
+    @JsonProperty("lecturer_id")
     private Integer lecturerId;
     private String lecturer;
     @JsonProperty("classroom")
@@ -23,7 +23,11 @@ public class ScheduledCourseTable {
     private String buildingName;
     @JsonProperty("weekday")
     private String weekDay;
-    @JsonProperty("create_time")
-    private Integer courseTime;
+    @JsonProperty("course_time")
+    private String courseTime;
     private String semester;
+    private Integer weeksTotal;
+    private Integer timesOnceAWeek;
+    private Integer currentTimes;
+    private Integer totalTimes;
 }
