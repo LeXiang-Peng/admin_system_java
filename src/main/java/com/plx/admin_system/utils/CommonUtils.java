@@ -234,8 +234,9 @@ public class CommonUtils {
             task.setCurrentTime(1);
             tasks.set(i, task);
             for (int j = 1; j < times; j++) {
-                task.setCurrentTime(j + 1);
-                tasks.add(new CourseTask(task));
+                CourseTask temp = new CourseTask(task);
+                temp.setCurrentTime(j + 1);
+                tasks.add(temp);
             }
         }
         return tasks;
