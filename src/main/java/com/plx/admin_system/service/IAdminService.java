@@ -5,6 +5,7 @@ import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.utils.pojo.selectedOptions.Options;
@@ -354,6 +355,7 @@ public interface IAdminService extends IService<Admin> {
 
     /**
      * get scheduled course 获取已编排的列表
+     *
      * @param queryParams
      * @param pageSize
      * @param pageNum
@@ -365,6 +367,7 @@ public interface IAdminService extends IService<Admin> {
 
     /**
      * get clazzs 获取选课的人群的专业
+     *
      * @param id
      * @return
      */
@@ -372,7 +375,23 @@ public interface IAdminService extends IService<Admin> {
 
     /**
      * arrange course table by genetic algorithm 通过遗传学算法排课
+     *
      * @return
      */
     ResponseResult arrangeCourseTableByGA();
+
+    /**
+     * get info 获取管理员信息
+     *
+     * @return
+     */
+    InfoDto getInfo();
+
+    /**
+     * save info 保存管理员信息
+     *
+     * @param info
+     * @return
+     */
+    Boolean saveInfo(InfoDto info);
 }

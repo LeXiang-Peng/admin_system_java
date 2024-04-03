@@ -5,6 +5,7 @@ import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.dto.DeleteDto;
+import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.service.IAdminService;
@@ -325,7 +326,21 @@ public class AdminController {
     }
 
     @GetMapping("/course/generate/ga")
-    public ResponseResult generateCourseTableByGA(){
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult generateCourseTableByGA() {
         return adminService.arrangeCourseTableByGA();
+    }
+
+    @GetMapping("/info")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getInfo() {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功", adminService.getInfo());
+    }
+
+    @PostMapping("/info/modify")
+    public ResponseResult modifyInfo(@RequestBody InfoDto postForm) {
+        return adminService.saveInfo(postForm) ? new ResponseResult(HttpStatus.OK.value(), "修改成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "修改失败，请联系管理员");
+
     }
 }

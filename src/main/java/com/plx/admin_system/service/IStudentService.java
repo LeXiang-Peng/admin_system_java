@@ -2,6 +2,7 @@ package com.plx.admin_system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.plx.admin_system.entity.Student;
+import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.views.SelectedCourse;
 
 import java.util.HashMap;
@@ -45,4 +46,19 @@ public interface IStudentService extends IService<Student> {
      * @return
      */
     List<Map> getCourseTable(Integer currentWeek);
+
+    /**
+     * get info 获取个人信息
+     *
+     * @return
+     */
+    HashMap getInfo();
+
+    /**
+     * save info 保存信息
+     *
+     * @param info
+     * @return
+     */
+    Boolean saveInfo(InfoDto info);
 }

@@ -19,7 +19,7 @@ public class CourseTask {
     private SchedulingCourse course;
     private Integer weeksTotal;
     private Integer timesOnceAWeek;
-    private Integer currentTime;
+    private Integer currentTimes;
     private Integer totalTimes;
     /**
      * 0 - 周一 ...4 - 周五
@@ -28,7 +28,7 @@ public class CourseTask {
     /**
      * 0 - 一二大节 ... 4 - 七八大节
      */
-    private Integer course_time;
+    private Integer courseTime;
     /**
      * 按List下标编码
      * 值为0，代表 List索引为0 的教室
@@ -40,8 +40,11 @@ public class CourseTask {
         this.course = new SchedulingCourse(task.getCourse());
         this.weeksTotal = task.getWeeksTotal();
         this.timesOnceAWeek = task.getTimesOnceAWeek();
-        this.currentTime = task.getCurrentTime();
+        this.currentTimes = task.getCurrentTimes();
         this.totalTimes = task.getTotalTimes();
+        this.weekDay = task.getWeekDay();
+        this.courseTime = task.getCourseTime();
+        this.classroom = task.getClassroom();
     }
 
     /**
@@ -50,10 +53,9 @@ public class CourseTask {
      * @param classroomListSize
      */
     public void init(Integer classroomListSize) {
-        Random random = new Random();
-        this.classroom = random.nextInt(classroomListSize);
-        this.weekDay = random.nextInt(5);
-        this.course_time = random.nextInt(4);
+        this.classroom = new Random().nextInt(classroomListSize);
+        this.weekDay = new Random().nextInt(5);
+        this.courseTime = new Random().nextInt(4);
     }
 
     /**
@@ -120,7 +122,7 @@ public class CourseTask {
      */
     private Boolean duringSameTime(CourseTask task) {
         if (Objects.equals(this.weekDay, task.getWeekDay())
-                && Objects.equals(this.course_time, task.getCourse_time())) {
+                && Objects.equals(this.courseTime, task.getCourseTime())) {
             return true;
         }
         return false;

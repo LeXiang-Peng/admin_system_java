@@ -3,6 +3,7 @@ package com.plx.admin_system.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
+import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.entity.views.SelectedCourse;
 import com.plx.admin_system.mapper.StudentMapper;
@@ -74,6 +75,20 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
             res.add(courseTable);
         }
         return CommonUtils.generateJsonCourse(res);
+    }
+
+    @Override
+    public HashMap getInfo() {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        return studentMapper.getInfo(loginUser.getUserId());
+    }
+
+    @Override
+    public Boolean saveInfo(InfoDto info) {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        return studentMapper.saveInfo(info, loginUser.getUserId());
     }
 
 }

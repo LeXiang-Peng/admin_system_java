@@ -3,9 +3,11 @@ package com.plx.admin_system.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
+import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.views.SelectedCourse;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -47,4 +49,21 @@ public interface StudentMapper extends BaseMapper<Student> {
      * @return
      */
     List<ScheduledCourseTable> getCourseTable(@Param("id") Integer id);
+
+    /**
+     * get info 获取个人信息
+     *
+     * @param id
+     * @return
+     */
+    HashMap getInfo(@Param("id") Integer id);
+
+    /**
+     * save info 保存信息
+     *
+     * @param info
+     * @param id
+     * @return
+     */
+    Boolean saveInfo(@Param("info") InfoDto info, @Param("id") Integer id);
 }

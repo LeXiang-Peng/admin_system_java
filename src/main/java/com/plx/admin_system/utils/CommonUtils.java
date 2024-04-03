@@ -17,7 +17,6 @@ import com.plx.admin_system.utils.pojo.selectedOptions.Profession;
 import io.jsonwebtoken.Claims;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -231,11 +230,11 @@ public class CommonUtils {
             task.setTotalTimes(total_times);
             task.setTimesOnceAWeek(times);
             task.setWeeksTotal(weeks_total);
-            task.setCurrentTime(1);
+            task.setCurrentTimes(1);
             tasks.set(i, task);
             for (int j = 1; j < times; j++) {
                 CourseTask temp = new CourseTask(task);
-                temp.setCurrentTime(j + 1);
+                temp.setCurrentTimes(j + 1);
                 tasks.add(temp);
             }
         }

@@ -3,9 +3,11 @@ package com.plx.admin_system.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.plx.admin_system.entity.ApprovalingCourse;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.dto.InfoDto;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -64,4 +66,27 @@ public interface ITeacherService extends IService<Teacher> {
      * @return
      */
     List<String> getCategoryList();
+
+    /**
+     * get course table 获取老师课表
+     *
+     * @param currentWeek
+     * @return
+     */
+    List<Map> getCourseTable(Integer currentWeek);
+
+    /**
+     * get info 获取教师信息
+     *
+     * @return
+     */
+    HashMap getInfo();
+
+    /**
+     * save info 保存教师信息
+     *
+     * @param info
+     * @return
+     */
+    Boolean saveInfo(InfoDto info);
 }

@@ -2,19 +2,21 @@ package com.plx.admin_system.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.plx.admin_system.entity.ApprovalingCourse;
+import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.mapper.TeacherMapper;
 import com.plx.admin_system.security.password.UserAuthenticationToken;
 import com.plx.admin_system.service.ITeacherService;
+import com.plx.admin_system.utils.CommonUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -69,5 +71,41 @@ public class TeacherServiceImpl extends ServiceImpl<TeacherMapper, Teacher> impl
     @Override
     public List<String> getCategoryList() {
         return teacherMapper.getCategoryList();
+    }
+
+    @Override
+    public List<Map> getCourseTable(Integer currentWeek) {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        List<ScheduledCourseTable> courseTables = teacherMapper.getCourseTable(loginUser.getUserId());
+        List<ScheduledCourseTable> res = new ArrayList<>();
+        for (ScheduledCourseTable courseTable : courseTables) {
+            if (courseTable.getWeeksTotal() < currentWeek) {
+                continue;
+            }
+            if (Objects.equals(courseTable.getWeeksTotal(), currentWeek)) {
+                //前n-1周上的课次加上这周的课次大于总课次，说明已结课
+                if ((currentWeek - 1) * courseTable.getTimesOnceAWeek() + courseTable.getCurrentTimes()
+                        > courseTable.getTotalTimes()) {
+                    continue;
+                }
+            }
+            res.add(courseTable);
+        }
+        return CommonUtils.generateJsonCourse(res);
+    }
+
+    @Override
+    public HashMap getInfo() {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        return teacherMapper.getInfo(loginUser.getUserId());
+    }
+
+    @Override
+    public Boolean saveInfo(InfoDto info) {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        return teacherMapper.saveInfo(info, loginUser.getUserId());
     }
 }

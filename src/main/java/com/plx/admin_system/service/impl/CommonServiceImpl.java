@@ -85,6 +85,7 @@ public class CommonServiceImpl implements CommonService {
             String jwt = JwtUtil.createJWT(userId + userName);
             Map<String, String> map = new HashMap();
             map.put("token", jwt);
+            map.put("userName", userName);
             //把完整的用户信息存入redis, userId 作为key
             redisCache.setCacheObject(CommonUtils.getRedisUserKey(userId, userName), loginUser);
             return map;

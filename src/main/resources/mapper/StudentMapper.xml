@@ -20,6 +20,24 @@
     <resultMap id="total3" type="Integer">
         <result column="total" jdbcType="INTEGER" javaType="Integer"></result>
     </resultMap>
+    <update id="saveInfo">
+        update student
+        <set>
+            <if test="info.name != null and info.name != ''">
+                student_name = #{info.name},
+            </if>
+            <if test="info.email != null and info.email != ''">
+                student_email = #{info.email},
+            </if>
+            <if test="info.phone != null and info.phone != ''">
+                student_phone_number = #{info.phone},
+            </if>
+            <if test="info.IDNumber != null and info.IDNumber != ''">
+                identification_number = #{info.IDNumber},
+            </if>
+        </set>
+        where student_id = #{id}
+    </update>
     <delete id="cancelCourse">
         delete
         from selected_course
@@ -92,8 +110,22 @@
                  )
         select scheduled_course.*
         from info
-        left join scheduled_course
-        on scheduled_course.course_id = info.course_id;
+                 left join scheduled_course
+                           on scheduled_course.course_id = info.course_id;
+    </select>
+    <resultMap id="studentInfoMap" type="com.plx.admin_system.entity.dto.InfoDto">
+        <result column="student_name" property="name" jdbcType="VARCHAR"></result>
+        <result column="student_phone_number" property="phone" jdbcType="VARCHAR"></result>
+        <result column="identification_number" property="IDNumber" jdbcType="VARCHAR"></result>
+        <result column="student_email" property="email" jdbcType="VARCHAR"></result>
+    </resultMap>
+    <select id="getInfo" resultType="java.util.HashMap">
+        select student_name          as name,
+               student_phone_number  as phone,
+               identification_number as IDNumber,
+               student_email         as email
+        from student
+        where student_id = #{id}
     </select>
     <insert id="selectCourse">
         insert into selected_course(course_id, course_name, category, student_id, student_name, clazz_name, semester)

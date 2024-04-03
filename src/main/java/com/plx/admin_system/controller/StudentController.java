@@ -1,5 +1,6 @@
 package com.plx.admin_system.controller;
 
+import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.SelectedCourse;
 import com.plx.admin_system.service.IStudentService;
@@ -46,4 +47,17 @@ public class StudentController {
     public ResponseResult getCourseTable(@PathVariable("current_week") Integer currentWeek) {
         return new ResponseResult(HttpStatus.OK.value(), "获取成功", studentService.getCourseTable(currentWeek));
     }
+
+    @GetMapping("/info")
+    public ResponseResult getInfo() {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功", studentService.getInfo());
+    }
+
+    @PostMapping("/info/modify")
+    public ResponseResult modifyInfo(@RequestBody InfoDto postForm) {
+        return studentService.saveInfo(postForm) ? new ResponseResult(HttpStatus.OK.value(), "修改成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "修改失败，请联系管理员");
+
+    }
+
 }

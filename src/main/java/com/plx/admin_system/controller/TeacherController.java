@@ -1,6 +1,7 @@
 package com.plx.admin_system.controller;
 
 import com.plx.admin_system.entity.ApprovalingCourse;
+import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.service.ITeacherService;
 import org.springframework.http.HttpStatus;
@@ -66,5 +67,22 @@ public class TeacherController {
     @RolesAllowed({"admin", "teacher"})
     public ResponseResult getCategoryList() {
         return new ResponseResult(HttpStatus.OK.value(), "获取成功", teacherService.getCategoryList());
+    }
+
+    @GetMapping("/course/table/{current_week}")
+    public ResponseResult getCourseTable(@PathVariable("current_week") Integer currentWeek) {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功", teacherService.getCourseTable(currentWeek));
+    }
+
+    @GetMapping("/info")
+    public ResponseResult getInfo() {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功", teacherService.getInfo());
+    }
+
+    @PostMapping("/info/modify")
+    public ResponseResult modifyInfo(@RequestBody InfoDto postForm) {
+        return teacherService.saveInfo(postForm) ? new ResponseResult(HttpStatus.OK.value(), "修改成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "修改失败，请联系管理员");
+
     }
 }

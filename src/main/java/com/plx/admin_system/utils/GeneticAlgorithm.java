@@ -1,6 +1,7 @@
 package com.plx.admin_system.utils;
 
 import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
+import io.swagger.models.auth.In;
 
 import java.util.*;
 
@@ -33,15 +34,26 @@ public class GeneticAlgorithm {
     public List<CourseTask> evolute(List<CourseTask> tasks, Integer classroomListSize) {
         //初始化
         this._init_population(tasks, classroomListSize);
+        //如果无法满足当前_conflicts = 10 则返回备选集最小的
+        LinkedHashMap<List<CourseTask>, Integer> res = new LinkedHashMap<>();
         //迭代 —— 通过变异交叉获取可能的解集，接着验证解集的适应度分值，当碰撞分值为0，则解已经出现
         for (int i = 0; i < MAX_ITERATION; i++) {
             List<List<CourseTask>> newPopulation = new ArrayList<>();
-            LinkedHashMap<List<CourseTask>, Integer> rateMap = _rate(population, ELITE_SIZE, tasks.size());
+            LinkedHashMap<List<CourseTask>, List<Integer>> rateMap = _rate(population, ELITE_SIZE, tasks.size());
             //遍历适应度分值，查看是否出现解
             for (List<CourseTask> key : rateMap.keySet()) {
-                //出现解
-                if (rateMap.get(key) == 0) {
-                    return key;
+                //出现解，即conflicts（必须达成的条件）= 0,
+                if (Objects.equals(rateMap.get(key).get(0), 0)) {
+                    //将满足硬性条件的结果集存下来
+                    List<CourseTask> res_data = new ArrayList<>();
+                    for (CourseTask temp : key) {
+                        res_data.add(new CourseTask(temp));
+                    }
+                    res.put(res_data, rateMap.get(key).get(1));
+                    //尽量返回最优解
+                    if (Objects.equals(rateMap.get(key).get(1), 0)) {
+                        return key;
+                    }
                 }
             }
             //精英种群
@@ -59,8 +71,14 @@ public class GeneticAlgorithm {
             }
             this.population = newPopulation;
         }
-        //没有出现解集
-        return new ArrayList<>();
+        List<Map.Entry<List<CourseTask>, Integer>> list = new ArrayList<>(res.entrySet());
+        Collections.sort(list, new Comparator<Map.Entry<List<CourseTask>, Integer>>() {
+            @Override
+            public int compare(Map.Entry<List<CourseTask>, Integer> o1, Map.Entry<List<CourseTask>, Integer> o2) {
+                return o1.getValue().compareTo(o2.getValue());
+            }
+        });
+        return res.entrySet().iterator().next().getKey();
     }
 
     /**
@@ -87,24 +105,43 @@ public class GeneticAlgorithm {
      *
      * @return
      */
-    private LinkedHashMap<List<CourseTask>, Integer> _rate(List<List<CourseTask>> population, Integer elite, Integer courseSize) {
-        LinkedHashMap<List<CourseTask>, Integer> temp_res = new LinkedHashMap();
-        LinkedHashMap<List<CourseTask>, Integer> res = new LinkedHashMap();
+    private LinkedHashMap<List<CourseTask>, List<Integer>> _rate(List<List<CourseTask>> population, Integer elite, Integer courseSize) {
+        LinkedHashMap<List<CourseTask>, List<Integer>> temp_res = new LinkedHashMap();
+        LinkedHashMap<List<CourseTask>, List<Integer>> res = new LinkedHashMap();
         CourseTask gene;
         CourseTask _gene;
         for (List<CourseTask> individual : population) {
             /**
+             * 防止在同一天或者同一个时段的课过于密集
+             */
+            int[] weekDayArr = new int[5];
+            int[] courseTimeArr = new int[4];
+            /**
              * 碰撞冲突值
              */
+            List<Integer> conflictList = new ArrayList<>();
+            //必须达成的条件，即值必须为0
             int conflicts = 0;
+            //非必须，优中选优
+            int _conflicts = 0;
+            Integer weekDay = individual.get(courseSize - 1).getWeekDay();
+            Integer courseTime = individual.get(courseSize - 1).getCourseTime();
+            /**
+             * 记录下每天的课程数和每个时间段的课程数
+             */
+            weekDayArr[weekDay] += 1;
+            courseTimeArr[courseTime] += 1;
             if (individual.get(courseSize - 1).studentTotalOverflows()) {
                 conflicts++;
             }
             for (int i = 0; i < courseSize - 1; i++) {
-                if (individual.get(i).studentTotalOverflows()) {
+                gene = individual.get(i);
+                weekDayArr[gene.getWeekDay()] += 1;
+                courseTimeArr[gene.getCourseTime()] += 1;
+
+                if (gene.studentTotalOverflows()) {
                     conflicts++;
                 }
-                gene = individual.get(i);
                 for (int j = i + 1; j < courseSize; j++) {
                     _gene = individual.get(j);
                     if (gene.courseOverlapsDuringSameTime(_gene)) {
@@ -121,18 +158,23 @@ public class GeneticAlgorithm {
                     }
                 }
             }
-            temp_res.put(individual, conflicts);
+            _conflicts = get_conflicts(weekDayArr, courseTimeArr);
+            conflictList.add(conflicts);
+            conflictList.add((_conflicts));
+            temp_res.put(individual, conflictList);
         }
-        List<Map.Entry<List<CourseTask>, Integer>> list = new ArrayList<>(temp_res.entrySet());
-        Collections.sort(list, new Comparator<Map.Entry<List<CourseTask>, Integer>>() {
+        List<Map.Entry<List<CourseTask>, List<Integer>>> list = new ArrayList<>(temp_res.entrySet());
+        Collections.sort(list, new Comparator<Map.Entry<List<CourseTask>, List<Integer>>>() {
             @Override
-            public int compare(Map.Entry<List<CourseTask>, Integer> o1, Map.Entry<List<CourseTask>, Integer> o2) {
-                //排序
-                return o1.getValue().compareTo(o2.getValue());
+            public int compare(Map.Entry<List<CourseTask>, List<Integer>> o1, Map.Entry<List<CourseTask>, List<Integer>> o2) {
+                if (Objects.equals(o1.getValue().get(0), o2.getValue().get(0))) {
+                    return o1.getValue().get(1).compareTo(o2.getValue().get(1));
+                }
+                return o1.getValue().get(0).compareTo(o2.getValue().get(0));
             }
         });
-        Iterator<Map.Entry<List<CourseTask>, Integer>> iterator = list.iterator();
-        Map.Entry<List<CourseTask>, Integer> entry = null;
+        Iterator<Map.Entry<List<CourseTask>, List<Integer>>> iterator = list.iterator();
+        Map.Entry<List<CourseTask>, List<Integer>> entry = null;
         /**
          * 当前精英的个数
          */
@@ -156,25 +198,29 @@ public class GeneticAlgorithm {
      * @return
      */
     private List<CourseTask> _mutate(List<List<CourseTask>> population, Integer classroomListSize) {
-        Random random = new Random();
         //随机选择变异种群中的个体
-        List<CourseTask> individual = new ArrayList<>(population.get(random.nextInt(population.size())));
+        List<CourseTask> individual = new ArrayList<>(population.get(new Random().nextInt(population.size())));
         //变异
         for (CourseTask chromosome : individual) {
             //随机变异——染色体上的基因点
-            int gene_index = random.nextInt(3);
+            int gene_index = new Random().nextInt(3);
             if (gene_index == 0) {
-                chromosome.setClassroom(random.nextInt(classroomListSize));
+                chromosome.setClassroom(new Random().nextInt(classroomListSize));
             } else if (gene_index == 1) {
-                chromosome.setWeekDay(random.nextInt(5));
+                chromosome.setWeekDay(new Random().nextInt(5));
             } else if (gene_index == 2) {
-                chromosome.setCourse_time(random.nextInt(4));
+                chromosome.setCourseTime(new Random().nextInt(4));
             }
         }
         //返回变异的个体
         return individual;
     }
 
+    /**
+     * 交叉—— 随机取出精英种群中 其中之二 进行染色体部分交叉
+     *
+     * @param elitePopulation
+     */
     private void _crossOver(List<List<CourseTask>> elitePopulation) {
         Random random = new Random();
         //随机取出两个个体
@@ -199,10 +245,47 @@ public class GeneticAlgorithm {
                 gene.setWeekDay(_gene.getWeekDay());
                 _gene.setWeekDay(temp);
             } else if (gene_index == 2) {
-                temp = gene.getCourse_time();
-                gene.setCourse_time(_gene.getCourse_time());
-                _gene.setCourse_time(temp);
+                temp = gene.getCourseTime();
+                gene.setCourseTime(_gene.getCourseTime());
+                _gene.setCourseTime(temp);
             }
         }
+    }
+
+    private static Integer get_conflicts(int[] weekDayArr, int[] courseTimeArr) {
+        Integer _conflicts = 0;
+        /**
+         * 记录课程是否分布均匀（粗略考虑）
+         * 通过迭代优中选优
+         */
+        for (int item : weekDayArr) {
+            if (item >= 4) {
+                _conflicts += 30;
+            }
+            if (item >= 3) {
+                _conflicts += 10;
+            }
+            if (item <= 1) {
+                _conflicts += 5;
+            }
+        }
+        Set courseTimeSet = new HashSet();
+        for (int item : courseTimeArr) {
+            courseTimeSet.add(item);
+            if (item >= 5) {
+                _conflicts += 30;
+            }
+            if (item >= 4) {
+                _conflicts += 15;
+
+            }
+            if (item <= 3) {
+                _conflicts += 10;
+            }
+            if (item <= 1) {
+                _conflicts += 5;
+            }
+        }
+        return _conflicts;
     }
 }

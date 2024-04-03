@@ -5,6 +5,7 @@ import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.*;
@@ -392,12 +393,26 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         //批处理
         tasks.stream().forEach(item -> {
             String weekDay = CommonUtils.WEEKDAYS.get(item.getWeekDay());
-            String courseTime = CommonUtils.COURSE_TIME.get(item.getCourse_time());
+            String courseTime = CommonUtils.COURSE_TIME.get(item.getCourseTime());
             ClassroomInfo roomInfo = classroomInfoList.get(item.getClassroom());
             mapper.insertTasks(item, item.getCourse(), courseTime, weekDay, roomInfo);
             mapper.updateCourseInfo(item.getId());
         });
         return CommonUtils.commit(sqlSession, "生成成功", "生成失败，请重新生成");
+    }
+
+    @Override
+    public InfoDto getInfo() {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        return adminMapper.getInfo(loginUser.getUserId());
+    }
+
+    @Override
+    public Boolean saveInfo(InfoDto info) {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        return adminMapper.saveInfo(info, loginUser.getUserId());
     }
 }
 

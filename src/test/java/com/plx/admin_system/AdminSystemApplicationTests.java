@@ -19,7 +19,8 @@ class AdminSystemApplicationTests {
 
     @Test
     void contextLoads() {
-        //commonMapper.getToBeScheduledCourse().stream().forEach(item-> System.out.println(item));
-
+        System.out.println(studentMapper.getInfo(20209014));
     }
+
+
 }

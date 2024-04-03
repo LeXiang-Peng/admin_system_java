@@ -2,9 +2,12 @@ package com.plx.admin_system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.plx.admin_system.entity.ApprovalingCourse;
+import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.dto.InfoDto;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -67,4 +70,29 @@ public interface TeacherMapper extends BaseMapper<Teacher> {
      * @return
      */
     List<String> getCategoryList();
+
+    /**
+     * get course table 获取老师课表
+     *
+     * @param id
+     * @return
+     */
+    List<ScheduledCourseTable> getCourseTable(@Param("id") Integer id);
+
+    /**
+     * get info 获取教师信息
+     *
+     * @param id
+     * @return
+     */
+    HashMap getInfo(@Param("id") Integer id);
+
+    /**
+     * save info 保存教师信息
+     *
+     * @param info
+     * @param id
+     * @return
+     */
+    Boolean saveInfo(@Param("info") InfoDto info, @Param("id") Integer id);
 }

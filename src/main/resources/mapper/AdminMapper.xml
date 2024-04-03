@@ -150,15 +150,6 @@
             <if test="studentGender != null and studentGender != ''">
                 student_gender = #{studentGender},
             </if>
-            <if test="studentPhoneNumber != null and studentPhoneNumber != ''">
-                student_email = #{studentPhoneNumber},
-            </if>
-            <if test="studentEmail != null and studentEmail != ''">
-                student_email = #{studentEmail},
-            </if>
-            <if test="studentPassword != null and studentPassword != ''">
-                student_password = #{studentPassword},
-            </if>
         </set>
         where student_id = #{id}
     </update>
@@ -314,6 +305,21 @@
         set is_scheduled = 1
         where course_id = #{id};
     </update>
+    <update id="saveInfo">
+        update admin
+        <set>
+            <if test="info.name != null and info.name != ''">
+                admin_name = #{info.name},
+            </if>
+            <if test="info.email != null and info.email != ''">
+                admin_email = #{info.email},
+            </if>
+            <if test="info.phone != null and info.phone != ''">
+                admin_phone_number = #{info.phone},
+            </if>
+        </set>
+        where admin_id = #{id}
+    </update>
 
     <sql id="courseKey">
         <if test="clazz != null and clazz != ''">
@@ -357,7 +363,7 @@
                                      total_times)
             value (#{task.id}, #{course.course}, #{course.lecturerId}, #{course.lecturer}, #{roomInfo.classroomName},
             #{roomInfo.buildingName}, #{weekDay}, #{courseTime}, #{course.semester}, #{task.weeksTotal},
-            #{task.timesOnceAWeek}, #{task.currentTime}, #{task.totalTimes});
+            #{task.timesOnceAWeek}, #{task.currentTimes}, #{task.totalTimes});
     </insert>
 
 
@@ -631,5 +637,15 @@
         from selected_course
         where course_id = #{id}
         group by clazz_name
+    </select>
+    <resultMap id="adminInfoMap" type="com.plx.admin_system.entity.dto.InfoDto">
+        <result column="admin_name" property="name" jdbcType="VARCHAR"></result>
+        <result column="admin_phone_number" property="phone" jdbcType="VARCHAR"></result>
+        <result column="admin_email" property="email" jdbcType="VARCHAR"></result>
+    </resultMap>
+    <select id="getInfo" resultType="com.plx.admin_system.entity.dto.InfoDto">
+        select admin_email as email, admin_phone_number as phone, admin_name as name
+        from admin
+        where admin_id = #{id}
     </select>
 </mapper>

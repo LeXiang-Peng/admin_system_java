@@ -114,6 +114,47 @@
         select found_rows() as total;
     </select>
     <select id="getCategoryList" resultType="String">
-        select category_name from category
+        select category_name
+        from category
     </select>
+    <select id="getCourseTable" resultType="com.plx.admin_system.entity.ScheduledCourseTable">
+        with info as
+                 (
+                     select course_id
+                     from course
+                     where lecturer_id = #{id}
+                 )
+        select scheduled_course.*
+        from info
+                 left join scheduled_course
+                           on scheduled_course.course_id = info.course_id;
+    </select>
+    <resultMap id="studentInfoMap" type="com.plx.admin_system.entity.dto.InfoDto">
+        <result column="teacher_name" property="name" jdbcType="VARCHAR"></result>
+        <result column="teacher_phone_number" property="phone" jdbcType="VARCHAR"></result>
+        <result column="teacher_email" property="email" jdbcType="VARCHAR"></result>
+    </resultMap>
+    <select id="getInfo" resultType="java.util.HashMap">
+        select teacher_name         as name,
+               teacher_phone_number as phone,
+               teacher_email        as email
+        from teacher
+        where teacher_id = #{id}
+    </select>
+
+    <update id="saveInfo">
+        update teacher
+        <set>
+            <if test="info.name != null and info.name != ''">
+                teacher_name = #{info.name},
+            </if>
+            <if test="info.email != null and info.email != ''">
+                teacher_email = #{info.email},
+            </if>
+            <if test="info.phone != null and info.phone != ''">
+                teacher_phone_number = #{info.phone},
+            </if>
+        </set>
+        where teacher_id = #{id}
+    </update>
 </mapper>

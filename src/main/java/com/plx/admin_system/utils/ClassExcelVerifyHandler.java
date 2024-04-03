@@ -4,7 +4,6 @@ import cn.afterturn.easypoi.excel.entity.result.ExcelVerifyHandlerResult;
 import cn.afterturn.easypoi.handler.inter.IExcelVerifyHandler;
 import cn.hutool.core.util.ObjectUtil;
 import lombok.SneakyThrows;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Component;
 
 /**

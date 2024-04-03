@@ -5,6 +5,7 @@ import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
 import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
@@ -385,4 +386,19 @@ public interface AdminMapper extends BaseMapper<Admin> {
      */
     Boolean updateCourseInfo(@Param("id") Integer id);
 
+    /**
+     * get info 获取管理员id
+     *
+     * @param id
+     * @return
+     */
+    InfoDto getInfo(@Param("id") Integer id);
+
+    /**
+     * save info 保存管理员信息
+     *
+     * @param id
+     * @return
+     */
+    Boolean saveInfo(@Param("info") InfoDto info, @Param("id") Integer id);
 }
