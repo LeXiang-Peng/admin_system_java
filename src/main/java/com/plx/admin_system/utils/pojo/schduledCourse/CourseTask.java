@@ -26,7 +26,7 @@ public class CourseTask {
      */
     private Integer weekDay;
     /**
-     * 0 - 一二大节 ... 4 - 七八大节
+     * 0 - 一二大节 ... 3 - 七八大节
      */
     private Integer courseTime;
     /**

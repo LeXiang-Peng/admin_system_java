@@ -17,6 +17,7 @@ import com.plx.admin_system.utils.CommonUtils;
 import com.plx.admin_system.utils.GeneticAlgorithm;
 import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
 import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
+import com.plx.admin_system.utils.pojo.schduledCourse.SchedulingCourse;
 import com.plx.admin_system.utils.pojo.selectedOptions.Options;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
@@ -413,6 +414,41 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
         return adminMapper.saveInfo(info, loginUser.getUserId());
+    }
+
+    @Override
+    public List<ClassroomInfo> getClassroomInfo() {
+        return (List<ClassroomInfo>) commonMapper.getAllClassroom().get(0);
+    }
+
+    @Override
+    public ResponseResult arrangeSingleCourseByGA(SchedulingCourse info) {
+        info.setClazzList(adminMapper.getClazzs(info.getCourseId()));
+        List<List<?>> list = commonMapper.getAllClassroom();
+        List<ClassroomInfo> classroomInfoList = (List<ClassroomInfo>) list.get(0);
+        Integer classroomListSize = (Integer) list.get(1).get(0);
+        //已编排的课程
+        List<CourseTask> scheduledCourses = CommonUtils.initCourseList(commonMapper.getScheduledCourseInfo(), classroomInfoList);
+        //待编排的课程
+        List<CourseTask> tasks = new ArrayList<>();
+        tasks = CommonUtils.initOneTask(tasks, CommonUtils.initOneCourseInfo(info));
+        GeneticAlgorithm algorithm = new GeneticAlgorithm();
+        tasks = algorithm.evolute(tasks, scheduledCourses, classroomListSize);
+        if (tasks.size() == 0) {
+            return new ResponseResult(HttpStatus.NOT_IMPLEMENTED.value(), "生成失败，请重新生成");
+        }
+        tasks.stream().forEach(v -> System.out.println(v));
+        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+        AdminMapper mapper = sqlSession.getMapper(AdminMapper.class);
+        //批处理
+        tasks.stream().forEach(item -> {
+            String weekDay = CommonUtils.WEEKDAYS.get(item.getWeekDay());
+            String courseTime = CommonUtils.COURSE_TIME.get(item.getCourseTime());
+            ClassroomInfo roomInfo = classroomInfoList.get(item.getClassroom());
+            mapper.insertTasks(item, item.getCourse(), courseTime, weekDay, roomInfo);
+            mapper.updateCourseInfo(item.getId());
+        });
+        return CommonUtils.commit(sqlSession, "生成成功", "生成失败，请重新生成");
     }
 }
 

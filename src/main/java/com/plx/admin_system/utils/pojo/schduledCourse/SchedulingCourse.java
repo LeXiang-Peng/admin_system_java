@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class SchedulingCourse {
+    @JsonProperty("id")
     private Integer courseId;
     private String course;
     @JsonProperty("lecturer_id")

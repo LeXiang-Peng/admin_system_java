@@ -88,6 +88,23 @@
         from classroom;
         select found_rows() as total;
     </select>
+    <resultMap id="scheduledCourseInfoMap" type="com.plx.admin_system.entity.views.ScheduledCourseInfo">
+        <id column="course_id" property="courseId" jdbcType="INTEGER"></id>
+        <result column="course_name" property="courseName" jdbcType="VARCHAR"></result>
+        <result column="lecturer" property="lecturer" jdbcType="VARCHAR"></result>
+        <result column="lecturer_id" property="lecturerId" jdbcType="INTEGER"></result>
+        <result column="classroom" property="classroom" jdbcType="VARCHAR"></result>
+        <result column="building" property="building" jdbcType="VARCHAR"></result>
+        <result column="weekday" property="weekday" jdbcType="VARCHAR"></result>
+        <result column="course_time" property="courseTime" jdbcType="VARCHAR"></result>
+        <collection property="clazzList" ofType="String">
+            <result column="clazz"></result>
+        </collection>
+    </resultMap>
+    <select id="getScheduledCourseInfo" resultMap="scheduledCourseInfoMap">
+        select *
+        from scheduled_course_info
+    </select>
 
     <delete id="resetCourseTable">
         update course

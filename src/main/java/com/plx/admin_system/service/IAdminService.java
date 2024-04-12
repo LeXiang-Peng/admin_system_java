@@ -8,6 +8,8 @@ import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.*;
+import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
+import com.plx.admin_system.utils.pojo.schduledCourse.SchedulingCourse;
 import com.plx.admin_system.utils.pojo.selectedOptions.Options;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.web.multipart.MultipartFile;
@@ -394,4 +396,19 @@ public interface IAdminService extends IService<Admin> {
      * @return
      */
     Boolean saveInfo(InfoDto info);
+
+    /**
+     * get classroom info 获取教室信息
+     *
+     * @return
+     */
+    List<ClassroomInfo> getClassroomInfo();
+
+    /**
+     * arrange single course by genetic algorithm 通过遗传学算法编排一门课程
+     *
+     * @param info
+     * @return
+     */
+    ResponseResult arrangeSingleCourseByGA(SchedulingCourse info);
 }

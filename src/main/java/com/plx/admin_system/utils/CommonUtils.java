@@ -9,8 +9,11 @@ import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.Menu;
 import com.plx.admin_system.entity.views.OptionsView;
+import com.plx.admin_system.entity.views.ScheduledCourseInfo;
 import com.plx.admin_system.utils.pojo.MenuList;
+import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
 import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
+import com.plx.admin_system.utils.pojo.schduledCourse.SchedulingCourse;
 import com.plx.admin_system.utils.pojo.selectedOptions.Clazz;
 import com.plx.admin_system.utils.pojo.selectedOptions.Options;
 import com.plx.admin_system.utils.pojo.selectedOptions.Profession;
@@ -220,25 +223,101 @@ public class CommonUtils {
      */
     public static List<CourseTask> initTasks(List<CourseTask> tasks) {
         Integer length = tasks.size();
+        List<CourseTask> list = new ArrayList<>();
         for (int i = 0; i < length; i++) {
-            CourseTask task = tasks.get(i);
-            Integer hours = tasks.get(i).getCourse().getHours();
-            double res = hours / EXPECTED_ENDING_WEEK;
-            Integer times = res >= 1 ? (int) Math.round(res - 0.2) : (int) Math.ceil(res);
-            Integer total_times = (int) Math.ceil(hours / 2.0F);
-            Integer weeks_total = (int) Math.ceil(hours / 2.0F / times);
-            task.setTotalTimes(total_times);
-            task.setTimesOnceAWeek(times);
-            task.setWeeksTotal(weeks_total);
-            task.setCurrentTimes(1);
-            tasks.set(i, task);
-            for (int j = 1; j < times; j++) {
-                CourseTask temp = new CourseTask(task);
-                temp.setCurrentTimes(j + 1);
-                tasks.add(temp);
-            }
+            list = initOneTask(list, tasks.get(i));
         }
-        return tasks;
+        return list;
+    }
+
+    /**
+     * init one task 初始化一个任务
+     *
+     * @param list
+     * @param task
+     * @return
+     */
+    public static List<CourseTask> initOneTask(List<CourseTask> list, CourseTask task) {
+        Integer hours = task.getCourse().getHours();
+        double res = hours / EXPECTED_ENDING_WEEK;
+        Integer times = res >= 1 ? (int) Math.round(res - 0.2) : (int) Math.ceil(res);
+        Integer total_times = (int) Math.ceil(hours / 2.0F);
+        Integer weeks_total = (int) Math.ceil(hours / 2.0F / times);
+        task.setTotalTimes(total_times);
+        task.setTimesOnceAWeek(times);
+        task.setWeeksTotal(weeks_total);
+        task.setCurrentTimes(1);
+        list.add(task);
+        for (int j = 1; j < times; j++) {
+            CourseTask temp = new CourseTask(task);
+            temp.setCurrentTimes(j + 1);
+            list.add(temp);
+        }
+        return list;
+    }
+
+    public static CourseTask initOneCourseInfo(SchedulingCourse info) {
+        CourseTask task = new CourseTask();
+        task.setId(info.getCourseId());
+        task.setCourse(info);
+        return task;
+    }
+
+    public static List<CourseTask> initCourseList(List<ScheduledCourseInfo> infos, List<ClassroomInfo> classrooms) {
+        List<CourseTask> courseList = new ArrayList<>();
+        for (ScheduledCourseInfo info : infos) {
+            CourseTask task = new CourseTask();
+            SchedulingCourse course = new SchedulingCourse();
+            task.setId(info.getCourseId());
+            task.setWeekDay(getWeekDay(info.getWeekday()));
+            task.setCourseTime(getCourseTime(info.getCourseTime()));
+            for (int i = 0; i < classrooms.size(); i++) {
+                if (Objects.equals(classrooms.get(i).getClassroomName(), info.getClassroom()) &&
+                        Objects.equals(classrooms.get(i).getBuildingName(), info.getBuilding())) {
+                    task.setClassroom(i);
+                }
+            }
+            course.setCourseId(info.getCourseId());
+            course.setCourse(info.getCourseName());
+            course.setLecturer(info.getLecturer());
+            course.setLecturerId(info.getLecturerId());
+            course.setClazzList(info.getClazzList());
+            task.setCourse(course);
+            courseList.add(task);
+        }
+        return courseList;
+    }
+
+    private static Integer getCourseTime(String courseTime) {
+        switch (courseTime) {
+            case "第一大节":
+                return 0;
+            case "第二大节":
+                return 1;
+            case "第三大节":
+                return 2;
+            case "第四大节":
+                return 3;
+            default:
+                return null;
+        }
+    }
+
+    private static Integer getWeekDay(String weekDay) {
+        switch (weekDay) {
+            case "周一":
+                return 0;
+            case "周二":
+                return 1;
+            case "周三":
+                return 2;
+            case "周四":
+                return 3;
+            case "周五":
+                return 4;
+            default:
+                return null;
+        }
     }
 
     public static List<Map> generateJsonCourse(List<ScheduledCourseTable> courseTableList) {

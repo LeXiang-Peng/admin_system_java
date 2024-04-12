@@ -10,6 +10,7 @@ import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.service.IAdminService;
 import com.plx.admin_system.utils.CommonUtils;
+import com.plx.admin_system.utils.pojo.schduledCourse.SchedulingCourse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -342,5 +343,15 @@ public class AdminController {
         return adminService.saveInfo(postForm) ? new ResponseResult(HttpStatus.OK.value(), "修改成功") :
                 new ResponseResult(HttpStatus.FORBIDDEN.value(), "修改失败，请联系管理员");
 
+    }
+
+    @GetMapping("/classroom")
+    public ResponseResult getClassroomInfo() {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功", adminService.getClassroomInfo());
+    }
+
+    @PostMapping("/course/single/generate/ga")
+    public ResponseResult generateSingleCourseByGA(@RequestBody SchedulingCourse info) {
+        return adminService.arrangeSingleCourseByGA(info);
     }
 }

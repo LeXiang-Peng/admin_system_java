@@ -29,46 +29,58 @@ public class GeneticAlgorithm {
      */
     private List<List<CourseTask>> population;
 
-
+    /**
+     * 一键排课
+     *
+     * @param tasks
+     * @param classroomListSize
+     * @return
+     */
     public List<CourseTask> evolute(List<CourseTask> tasks, Integer classroomListSize) {
         //初始化
         this._init_population(tasks, classroomListSize);
+        //res 为备选集
         //如果无法满足当前_conflicts = 0,即完美解不存在(或者本次迭代中未找到), 则返回备选集最优解
         LinkedHashMap<List<CourseTask>, Integer> res = new LinkedHashMap<>();
-        //迭代 —— 通过变异交叉获取可能的解集，接着验证解集的适应度分值，当碰撞分值为0，则解已经出现
+        //迭代 —— 通过变异交叉获取可能的解集，接着验证解集的适应度分值
         for (int i = 0; i < MAX_ITERATION; i++) {
             List<List<CourseTask>> newPopulation = new ArrayList<>();
+            //获取适应度分值
             LinkedHashMap<List<CourseTask>, List<Integer>> rateMap = _rate(population, ELITE_SIZE, tasks.size());
-            //遍历适应度分值，查看是否出现解
-            for (List<CourseTask> key : rateMap.keySet()) {
-                //出现解，即conflicts（必须达成的条件）= 0,
-                if (Objects.equals(rateMap.get(key).get(0), 0)) {
-                    //将满足必要条件的结果集存下来，作为备选集（用作保底）
-                    List<CourseTask> res_data = new ArrayList<>();
-                    for (CourseTask temp : key) {
-                        res_data.add(new CourseTask(temp));
-                    }
-                    res.put(res_data, rateMap.get(key).get(1));
-                    //尽量返回完美解
-                    if (Objects.equals(rateMap.get(key).get(1), 0)) {
-                        return key;
-                    }
-                }
+            //获取演化的结果
+            List<CourseTask> result = evolvingProcess(res, newPopulation, rateMap, classroomListSize);
+            if (Objects.nonNull(result)) {
+                return result;
             }
-            //精英种群
-            for (List<CourseTask> key : rateMap.keySet()) {
-                newPopulation.add(key);
+        }
+        //当完美解不存在时，返回最优解
+        return getBestIndividual(res);
+    }
+
+    /**
+     * evolute 随机生成单个课程的安排
+     *
+     * @param tasks 未编排的课程
+     * @param courseList 已编排的课程
+     * @param classroomListSize
+     * @return
+     */
+    public List<CourseTask> evolute(List<CourseTask> tasks, List<CourseTask> courseList, Integer classroomListSize) {
+        //初始化
+        this._init_population(tasks, classroomListSize);
+        //res 为备选集
+        //如果无法满足当前_conflicts = 0,即完美解不存在(或者本次迭代中未找到), 则返回备选集最优解
+        LinkedHashMap<List<CourseTask>, Integer> res = new LinkedHashMap<>();
+        //迭代 —— 通过变异交叉获取可能的解集，接着验证解集的适应度分值
+        for (int i = 0; i < MAX_ITERATION; i++) {
+            List<List<CourseTask>> newPopulation = new ArrayList<>();
+            //获取适应度分值
+            LinkedHashMap<List<CourseTask>, List<Integer>> rateMap = _rate(population, courseList, ELITE_SIZE, tasks.size());
+            //获取演化的结果
+            List<CourseTask> result = evolvingProcess(res, newPopulation, rateMap, classroomListSize);
+            if (Objects.nonNull(result)) {
+                return result;
             }
-            while (newPopulation.size() < POPULATION_SIZE) {
-                if (Math.random() < MUTATION_PROBABILITY) {
-                    //将变异个体加入种群中
-                    newPopulation.add(_mutate(newPopulation, classroomListSize));
-                } else {
-                    //通过两个精英个体进行交叉
-                    _crossOver(newPopulation);
-                }
-            }
-            this.population = newPopulation;
         }
         //当完美解不存在时，返回最优解
         return getBestIndividual(res);
@@ -89,6 +101,44 @@ public class GeneticAlgorithm {
             }
         });
         return res.entrySet().iterator().next().getKey();
+    }
+
+
+    private List<CourseTask> evolvingProcess(LinkedHashMap<List<CourseTask>, Integer> res,
+                                             List<List<CourseTask>> newPopulation,
+                                             LinkedHashMap<List<CourseTask>, List<Integer>> rateMap,
+                                             Integer classroomListSize) {
+        //遍历适应度分值，查看是否出现解
+        for (List<CourseTask> key : rateMap.keySet()) {
+            //出现解，即conflicts（必须达成的条件）= 0,
+            if (Objects.equals(rateMap.get(key).get(0), 0)) {
+                //将满足必要条件的结果集存下来，作为备选集（用作保底）
+                List<CourseTask> res_data = new ArrayList<>();
+                for (CourseTask temp : key) {
+                    res_data.add(new CourseTask(temp));
+                }
+                res.put(res_data, rateMap.get(key).get(1));
+                //尽量返回完美解
+                if (Objects.equals(rateMap.get(key).get(1), 0)) {
+                    return key;
+                }
+            }
+        }
+        //精英种群
+        for (List<CourseTask> key : rateMap.keySet()) {
+            newPopulation.add(key);
+        }
+        while (newPopulation.size() < POPULATION_SIZE) {
+            if (Math.random() < MUTATION_PROBABILITY) {
+                //将变异个体加入种群中
+                newPopulation.add(_mutate(newPopulation, classroomListSize));
+            } else {
+                //通过两个精英个体进行交叉
+                _crossOver(newPopulation);
+            }
+        }
+        this.population = newPopulation;
+        return null;
     }
 
     /**
@@ -115,9 +165,10 @@ public class GeneticAlgorithm {
      *
      * @return
      */
-    private LinkedHashMap<List<CourseTask>, List<Integer>> _rate(List<List<CourseTask>> population, Integer elite, Integer courseSize) {
+    private LinkedHashMap<List<CourseTask>, List<Integer>> _rate(List<List<CourseTask>> population,
+                                                                 Integer elite, Integer courseSize) {
+
         LinkedHashMap<List<CourseTask>, List<Integer>> temp_res = new LinkedHashMap();
-        LinkedHashMap<List<CourseTask>, List<Integer>> res = new LinkedHashMap();
         CourseTask gene;
         CourseTask _gene;
         for (List<CourseTask> individual : population) {
@@ -143,33 +194,23 @@ public class GeneticAlgorithm {
              */
             weekDayArr[weekDay] += 1;
             courseTimeArr[courseTime] += 1;
+
             if (individual.get(courseSize - 1).studentTotalOverflows()) {
                 conflicts++;
             }
             for (int i = 0; i < courseSize - 1; i++) {
                 gene = individual.get(i);
+
                 weekDayArr[gene.getWeekDay()] += 1;
                 courseTimeArr[gene.getCourseTime()] += 1;
-                /**
-                 * 如下见知意
-                 */
+
                 if (gene.studentTotalOverflows()) {
                     conflicts++;
                 }
+
                 for (int j = i + 1; j < courseSize; j++) {
                     _gene = individual.get(j);
-                    if (gene.courseOverlapsDuringSameTime(_gene)) {
-                        conflicts++;
-                    }
-                    if (gene.clazzOverlapsDuringSameTime(_gene)) {
-                        conflicts++;
-                    }
-                    if (gene.lecturerOverlapsDuringSameTime(_gene)) {
-                        conflicts++;
-                    }
-                    if (gene.SameCourseDuringSameDay(_gene)) {
-                        conflicts++;
-                    }
+                    conflicts += getConflicts(gene, _gene);
                 }
             }
             /**
@@ -180,49 +221,63 @@ public class GeneticAlgorithm {
             conflictList.add((_conflicts));
             temp_res.put(individual, conflictList);
         }
-        List<Map.Entry<List<CourseTask>, List<Integer>>> list = new ArrayList<>(temp_res.entrySet());
-        Collections.sort(list, new Comparator<Map.Entry<List<CourseTask>, List<Integer>>>() {
-            @Override
-            public int compare(Map.Entry<List<CourseTask>, List<Integer>> o1, Map.Entry<List<CourseTask>, List<Integer>> o2) {
-                /**
-                 * 这样做的目的是防止，头重脚轻的局面
-                 * 假设有这样一种情况，当必要条件已经满足,即conflicts == 0
-                 * 但是其非必要条件的冲突特别大,假设为_conflicts = 40
-                 * 如果使用，必要条件相等的时候，再使用非必要条件进行排序这种方式，就会导致[0,40]会排在[1,0]的前面,这样就很不合理。
-                 * 只用片面的条件进行比较，必要会导致片面的结果
-                 * 所有我采用，当非必要条件相差不大（默认+=1的范围），则考虑是否用非必要条件进行比较
-                 * 如果非必要条件相差很大（默认+=10的范围）,则使用非必要条件进行排序，否则使用必要条件进行排序。
-                 */
-                //如果必要条件相差不大，即差值在+-1内（包含1），则进行下面的判断
-                if (Math.abs((o1.getValue().get(0) - o2.getValue().get(0))) <= 1) {
-                    //如果非必要条件的差距很大，则用非必要条件进行排序
-                    if (Math.abs((o1.getValue().get(1) - o2.getValue().get(1))) >= 10) {
-                        return o1.getValue().get(1).compareTo(o2.getValue().get(1));
-                    }
-                    //否则用必要条件进行排序
-                    return o1.getValue().get(0).compareTo(o2.getValue().get(0));
+        return compare(temp_res, elite);
+    }
+
+    private LinkedHashMap<List<CourseTask>, List<Integer>> _rate(List<List<CourseTask>> population,
+                                                                 List<CourseTask> courseList,
+                                                                 Integer elite, Integer courseSize) {
+
+        LinkedHashMap<List<CourseTask>, List<Integer>> temp_res = new LinkedHashMap();
+        LinkedHashMap<List<CourseTask>, List<Integer>> res = new LinkedHashMap();
+        CourseTask gene;
+        CourseTask _gene;
+        for (List<CourseTask> individual : population) {
+            List<Integer> conflictList = new ArrayList<>();
+            int conflicts = 0;
+            int _conflicts = 0;
+
+            int[] weekDayArr = new int[5];
+            int[] courseTimeArr = new int[4];
+
+            Integer weekDay = individual.get(courseSize - 1).getWeekDay();
+            Integer courseTime = individual.get(courseSize - 1).getCourseTime();
+
+            weekDayArr[weekDay] += 1;
+            courseTimeArr[courseTime] += 1;
+
+            if (individual.get(courseSize - 1).studentTotalOverflows()) {
+                conflicts++;
+            }
+
+            for (int i = 0; i < courseSize - 1; i++) {
+                gene = individual.get(i);
+
+                weekDayArr[gene.getWeekDay()] += 1;
+                courseTimeArr[gene.getCourseTime()] += 1;
+
+                if (gene.studentTotalOverflows()) {
+                    conflicts++;
                 }
-                return o1.getValue().get(0).compareTo(o2.getValue().get(0));
+
+                for (CourseTask course : courseList) {
+                    weekDayArr[course.getWeekDay()] += 1;
+                    courseTimeArr[course.getCourseTime()] += 1;
+
+                    conflicts += getConflicts(gene, course);
+                }
+
+                for (int j = i + 1; j < courseSize; j++) {
+                    _gene = individual.get(j);
+                    conflicts += getConflicts(gene, _gene);
+                }
             }
-        });
-        Iterator<Map.Entry<List<CourseTask>, List<Integer>>> iterator = list.iterator();
-        Map.Entry<List<CourseTask>, List<Integer>> entry = null;
-        /**
-         * 记录当前精英的个数
-         */
-        int count = 0;
-        System.out.println("\n");
-        while (iterator.hasNext()) {
-            entry = iterator.next();
-            System.out.println(entry.getValue());
-            res.put(entry.getKey(), entry.getValue());
-            count++;
-            if (count == elite) {
-                break;
-            }
+            _conflicts = get_conflicts(weekDayArr, courseTimeArr);
+            conflictList.add(conflicts);
+            conflictList.add(_conflicts);
+            temp_res.put(individual, conflictList);
         }
-        System.out.println("\n");
-        return res;
+        return compare(temp_res, elite);
     }
 
     /**
@@ -287,6 +342,13 @@ public class GeneticAlgorithm {
         }
     }
 
+    /**
+     * get _conflicts
+     *
+     * @param weekDayArr
+     * @param courseTimeArr
+     * @return
+     */
     private static Integer get_conflicts(int[] weekDayArr, int[] courseTimeArr) {
         Integer _conflicts = 0;
         /**
@@ -322,5 +384,78 @@ public class GeneticAlgorithm {
             }
         }
         return _conflicts;
+    }
+
+    /**
+     * get conflicts
+     *
+     * @param gene
+     * @param _gene
+     * @return
+     */
+    private static Integer getConflicts(CourseTask gene, CourseTask _gene) {
+        /**
+         * 如下见名知意
+         */
+        Integer conflicts = 0;
+        if (gene.courseOverlapsDuringSameTime(_gene)) {
+            conflicts++;
+        }
+        if (gene.clazzOverlapsDuringSameTime(_gene)) {
+            conflicts++;
+        }
+        if (gene.lecturerOverlapsDuringSameTime(_gene)) {
+            conflicts++;
+        }
+        if (gene.SameCourseDuringSameDay(_gene)) {
+            conflicts++;
+        }
+        return conflicts;
+    }
+
+    LinkedHashMap<List<CourseTask>, List<Integer>> compare(LinkedHashMap<List<CourseTask>, List<Integer>> temp_res,
+                                                           Integer elite) {
+
+        LinkedHashMap<List<CourseTask>, List<Integer>> res = new LinkedHashMap();
+        List<Map.Entry<List<CourseTask>, List<Integer>>> list = new ArrayList<>(temp_res.entrySet());
+        Collections.sort(list, new Comparator<Map.Entry<List<CourseTask>, List<Integer>>>() {
+            @Override
+            public int compare(Map.Entry<List<CourseTask>, List<Integer>> o1, Map.Entry<List<CourseTask>, List<Integer>> o2) {
+                /**
+                 * 这样做的目的是防止，头重脚轻的局面
+                 * 假设有这样一种情况，当必要条件已经满足,即conflicts == 0
+                 * 但是其非必要条件的冲突特别大,假设为_conflicts = 40
+                 * 如果使用，必要条件相等的时候，再使用非必要条件进行排序这种方式，就会导致[0,40]会排在[1,0]的前面,这样就很不合理。
+                 * 只用片面的条件进行比较，必要会导致片面的结果
+                 * 所有我采用，当非必要条件相差不大（默认+=1的范围），则考虑是否用非必要条件进行比较
+                 * 如果非必要条件相差很大（默认+=10的范围）,则使用非必要条件进行排序，否则使用必要条件进行排序。
+                 */
+                //如果必要条件相差不大，即差值在+-1内（包含1），则进行下面的判断
+                if (Math.abs((o1.getValue().get(0) - o2.getValue().get(0))) <= 1) {
+                    //如果非必要条件的差距很大，则用非必要条件进行排序
+                    if (Math.abs((o1.getValue().get(1) - o2.getValue().get(1))) >= 10) {
+                        return o1.getValue().get(1).compareTo(o2.getValue().get(1));
+                    }
+                    //否则用必要条件进行排序
+                    return o1.getValue().get(0).compareTo(o2.getValue().get(0));
+                }
+                return o1.getValue().get(0).compareTo(o2.getValue().get(0));
+            }
+        });
+        Iterator<Map.Entry<List<CourseTask>, List<Integer>>> iterator = list.iterator();
+        Map.Entry<List<CourseTask>, List<Integer>> entry = null;
+        /**
+         * 记录当前精英的个数
+         */
+        int count = 0;
+        while (iterator.hasNext()) {
+            entry = iterator.next();
+            res.put(entry.getKey(), entry.getValue());
+            count++;
+            if (count == elite) {
+                break;
+            }
+        }
+        return res;
     }
 }

@@ -560,6 +560,7 @@
         <result column="lecturer" property="lecturer" jdbcType="VARCHAR"></result>
         <result column="student_total" property="studentTotal" jdbcType="INTEGER"></result>
         <result column="clazz" property="clazz" jdbcType="VARCHAR"></result>
+        <result column="hours" property="hours" jdbcType="INTEGER"></result>
     </resultMap>
 
     <sql id="queryToBeScheduledParams">
@@ -618,7 +619,7 @@
 
     <select id="getToBeScheduledCourses" resultMap="toBeScheduledCoursesMap,total">
         select sql_calc_found_rows *
-        from to_be_scheduled_courses
+        from to_be_scheduled_course
         <include refid="queryToBeScheduledParams"></include>
         limit #{pageNum},#{pageSize};
         select found_rows() as total;

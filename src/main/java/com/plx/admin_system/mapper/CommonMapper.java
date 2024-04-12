@@ -4,6 +4,7 @@ import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.views.Menu;
+import com.plx.admin_system.entity.views.ScheduledCourseInfo;
 import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
 import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
 import org.apache.ibatis.annotations.MapKey;
@@ -118,4 +119,11 @@ public interface CommonMapper {
      * @return
      */
     Boolean resetCourseTable();
+
+    /**
+     * get scheduled course info 获取已经编排课程信息
+     *
+     * @return
+     */
+    List<ScheduledCourseInfo> getScheduledCourseInfo();
 }

@@ -21,4 +21,5 @@ public class ToBeScheduledCourses {
     private String clazz;
     @JsonProperty("student_total")
     private Integer studentTotal;
+    private Integer hours;
 }

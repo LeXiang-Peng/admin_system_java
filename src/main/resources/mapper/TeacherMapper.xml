@@ -127,7 +127,8 @@
         select scheduled_course.*
         from info
                  left join scheduled_course
-                           on scheduled_course.course_id = info.course_id;
+                           on scheduled_course.course_id = info.course_id
+        where scheduled_course.course_id is not null;
     </select>
     <resultMap id="studentInfoMap" type="com.plx.admin_system.entity.dto.InfoDto">
         <result column="teacher_name" property="name" jdbcType="VARCHAR"></result>

@@ -63,7 +63,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 if (admin.getAdminId() == 1) {
                     list.add(CommonUtils.IDENTITY_PERMANENT_ADMIN);
                 }
-                System.out.println(list);
                 return new MyUserDetails(admin, list);
             default:
                 return null;
