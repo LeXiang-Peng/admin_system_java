@@ -89,7 +89,7 @@
         select found_rows() as total;
     </select>
     <resultMap id="scheduledCourseInfoMap" type="com.plx.admin_system.entity.views.ScheduledCourseInfo">
-        <id column="course_id" property="courseId" jdbcType="INTEGER"></id>
+        <result column="course_id" property="courseId" jdbcType="INTEGER"></result>
         <result column="course_name" property="courseName" jdbcType="VARCHAR"></result>
         <result column="lecturer" property="lecturer" jdbcType="VARCHAR"></result>
         <result column="lecturer_id" property="lecturerId" jdbcType="INTEGER"></result>

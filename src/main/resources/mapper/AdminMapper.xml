@@ -138,20 +138,23 @@
         value (<include refid="adminValue"></include>)
     </insert>
 
-    <update id="updateOneStudent" parameterType="com.plx.admin_system.entity.Student">
+    <update id="updateOneStudent" parameterType="com.plx.admin_system.entity.dto.EditForm">
         update student
         <set>
-            <if test="studentId != null">
-                student_id = #{studentId},
+            <if test="editForm.id != null">
+                student_id = #{editForm.id},
             </if>
-            <if test="studentName != null and studentName != ''">
-                student_name = #{studentName},
+            <if test="editForm.name != null and editForm.name != ''">
+                student_name = #{editForm.name},
             </if>
-            <if test="studentGender != null and studentGender != ''">
-                student_gender = #{studentGender},
+            <if test="editForm.clazz != null and editForm.clazz != ''">
+                clazz_name = #{editForm.clazz},
+            </if>
+            <if test="editForm.gender != null and editForm.gender != ''">
+                student_gender = #{editForm.gender},
             </if>
         </set>
-        where student_id = #{id}
+        where student_id = #{studentId}
     </update>
 
     <update id="deleteStudents">

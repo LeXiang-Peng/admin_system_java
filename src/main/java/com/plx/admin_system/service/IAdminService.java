@@ -5,6 +5,7 @@ import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.dto.EditForm;
 import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.*;
@@ -51,15 +52,6 @@ public interface IAdminService extends IService<Admin> {
      * @return Options
      */
     List<Options> getOptions();
-
-    /**
-     * update one student 更新一条学生信息
-     *
-     * @param id
-     * @param student
-     * @return
-     */
-    Boolean updateOneStudent(Integer id, Student student);
 
     /**
      * delete student 逻辑删除
@@ -411,4 +403,11 @@ public interface IAdminService extends IService<Admin> {
      * @return
      */
     ResponseResult arrangeSingleCourseByGA(SchedulingCourse info);
+
+    /**
+     *
+     * @param editForm
+     * @return
+     */
+    ResponseResult saveStudentInfo(Integer studentId,EditForm editForm);
 }

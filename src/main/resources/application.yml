@@ -21,9 +21,7 @@ spring:
 mybatis:
   config-location: classpath:mapper/*.xml
 
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
 
 swagger:
   enable: true

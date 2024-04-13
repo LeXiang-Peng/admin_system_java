@@ -5,6 +5,7 @@ import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.dto.DeleteDto;
+import com.plx.admin_system.entity.dto.EditForm;
 import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.*;
@@ -64,14 +65,6 @@ public class AdminController {
                     new ResponseResult(HttpStatus.FORBIDDEN.value(), "删除失败，请联系管理人员");
         }
         return new ResponseResult(HttpStatus.FORBIDDEN.value(), "密码错误，请重新输入");
-    }
-
-    @PostMapping("/student/update/{id}")
-    @PreAuthorize("hasAuthority('admin')")
-    //TODO 编辑功能
-    public ResponseResult updateOneStudent(@PathVariable Integer id, @RequestBody Student student) {
-        return adminService.updateOneStudent(id, student) ? new ResponseResult(HttpStatus.OK.value(), "更新成功") :
-                new ResponseResult(HttpStatus.FORBIDDEN.value(), "更新失败，请联系管理人员");
     }
 
     @GetMapping("/student/resetPassword/{id}")
@@ -353,5 +346,10 @@ public class AdminController {
     @PostMapping("/course/single/generate/ga")
     public ResponseResult generateSingleCourseByGA(@RequestBody SchedulingCourse info) {
         return adminService.arrangeSingleCourseByGA(info);
+    }
+
+    @PostMapping("/student/save/info/{studentId}")
+    public ResponseResult saveStudentInfo(@PathVariable Integer studentId, @RequestBody EditForm editForm) {
+        return adminService.saveStudentInfo(studentId, editForm);
     }
 }

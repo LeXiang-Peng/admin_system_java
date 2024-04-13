@@ -5,12 +5,14 @@ import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.dto.EditForm;
 import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
 import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
 import com.plx.admin_system.utils.pojo.schduledCourse.SchedulingCourse;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -45,11 +47,11 @@ public interface AdminMapper extends BaseMapper<Admin> {
     /**
      * update one student 更新一条学生信息
      *
-     * @param id
-     * @param student
+     * @param studentId
+     * @param editForm
      * @return Boolean
      */
-    Boolean updateOneStudent(@Param("id") Integer id, Student student);
+    Boolean updateOneStudent(@Param("studentId") Integer studentId, @Param("editForm") EditForm editForm);
 
     /**
      * delete students 逻辑删除

@@ -21,6 +21,7 @@ public class SchedulingCourse {
     private String lecturer;
     private Integer hours;
     private String semester;
+    @JsonProperty("clazz")
     private List<String> clazzList;
     @JsonProperty("student_total")
     private Integer studentTotal;

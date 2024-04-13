@@ -5,6 +5,7 @@ import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.dto.EditForm;
 import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.entity.dto.ResponseResult;
@@ -73,15 +74,6 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     @Override
     public List<Options> getOptions() {
         return CommonUtils.generateOptions(adminMapper.getOptionsView());
-    }
-
-    @Override
-    public Boolean updateOneStudent(Integer id, Student student) {
-        try {
-            return adminMapper.updateOneStudent(id, student);
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     @Override
@@ -423,7 +415,9 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
 
     @Override
     public ResponseResult arrangeSingleCourseByGA(SchedulingCourse info) {
-        info.setClazzList(adminMapper.getClazzs(info.getCourseId()));
+        if (Objects.isNull(info.getClazzList())) {
+            info.setClazzList(adminMapper.getClazzs(info.getCourseId()));
+        }
         List<List<?>> list = commonMapper.getAllClassroom();
         List<ClassroomInfo> classroomInfoList = (List<ClassroomInfo>) list.get(0);
         Integer classroomListSize = (Integer) list.get(1).get(0);
@@ -437,7 +431,6 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         if (tasks.size() == 0) {
             return new ResponseResult(HttpStatus.NOT_IMPLEMENTED.value(), "生成失败，请重新生成");
         }
-        tasks.stream().forEach(v -> System.out.println(v));
         SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
         AdminMapper mapper = sqlSession.getMapper(AdminMapper.class);
         //批处理
@@ -449,6 +442,13 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
             mapper.updateCourseInfo(item.getId());
         });
         return CommonUtils.commit(sqlSession, "生成成功", "生成失败，请重新生成");
+    }
+
+    @Override
+    public ResponseResult saveStudentInfo(Integer studentId, EditForm editForm) {
+        return adminMapper.updateOneStudent(studentId, editForm) ?
+                new ResponseResult(HttpStatus.OK.value(), "保存成功")
+                : new ResponseResult(HttpStatus.FORBIDDEN.value(), "保存失败，请联系管理人员");
     }
 }
 

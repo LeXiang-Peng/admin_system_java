@@ -60,8 +60,8 @@ public class GeneticAlgorithm {
     /**
      * evolute 随机生成单个课程的安排
      *
-     * @param tasks 未编排的课程
-     * @param courseList 已编排的课程
+     * @param tasks             未编排的课程
+     * @param courseList        已编排的课程
      * @param classroomListSize
      * @return
      */
@@ -161,6 +161,7 @@ public class GeneticAlgorithm {
     }
 
     /**
+     * 一键排课
      * 计算适应度分值
      *
      * @return
@@ -187,17 +188,19 @@ public class GeneticAlgorithm {
             int conflicts = 0;
             //非必须，优中选优
             int _conflicts = 0;
+            /**
+             * 利用下方的 0 - courseSize-2 的循环遍历，所以需要初始化courseSize - 1
+             */
             Integer weekDay = individual.get(courseSize - 1).getWeekDay();
             Integer courseTime = individual.get(courseSize - 1).getCourseTime();
-            /**
-             * 记录下 每天的课程数 和 每个时间段的课程数
-             */
+            // 记录下 每天的课程数 和 每个时间段的课程数
             weekDayArr[weekDay] += 1;
             courseTimeArr[courseTime] += 1;
 
             if (individual.get(courseSize - 1).studentTotalOverflows()) {
                 conflicts++;
             }
+
             for (int i = 0; i < courseSize - 1; i++) {
                 gene = individual.get(i);
 
@@ -224,6 +227,15 @@ public class GeneticAlgorithm {
         return compare(temp_res, elite);
     }
 
+    /**
+     * 单个课程所采用的
+     *
+     * @param population
+     * @param courseList
+     * @param elite
+     * @param courseSize
+     * @return
+     */
     private LinkedHashMap<List<CourseTask>, List<Integer>> _rate(List<List<CourseTask>> population,
                                                                  List<CourseTask> courseList,
                                                                  Integer elite, Integer courseSize) {
@@ -250,6 +262,14 @@ public class GeneticAlgorithm {
                 conflicts++;
             }
 
+            for (CourseTask course : courseList) {
+                weekDayArr[course.getWeekDay()] += 1;
+                courseTimeArr[course.getCourseTime()] += 1;
+                for (int i = 0; i < courseSize; i++) {
+                    conflicts += getConflicts(individual.get(i), course);
+                }
+            }
+
             for (int i = 0; i < courseSize - 1; i++) {
                 gene = individual.get(i);
 
@@ -258,13 +278,6 @@ public class GeneticAlgorithm {
 
                 if (gene.studentTotalOverflows()) {
                     conflicts++;
-                }
-
-                for (CourseTask course : courseList) {
-                    weekDayArr[course.getWeekDay()] += 1;
-                    courseTimeArr[course.getCourseTime()] += 1;
-
-                    conflicts += getConflicts(gene, course);
                 }
 
                 for (int j = i + 1; j < courseSize; j++) {
