@@ -5,7 +5,11 @@ import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import com.plx.admin_system.entity.ScheduledCourseTable;
+import com.plx.admin_system.entity.dto.ChangeCourseDto;
 import com.plx.admin_system.entity.dto.ResponseResult;
 import com.plx.admin_system.entity.views.Menu;
 import com.plx.admin_system.entity.views.OptionsView;
@@ -26,6 +30,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -389,9 +395,15 @@ public class CommonUtils {
     private static List getJson(ScheduledCourseTable courseTable) {
         List res = new ArrayList();
         Map json = new HashMap();
+        json.put("course_id", courseTable.getCourseId());
         json.put("course", courseTable.getCourseName());
         json.put("classroom", courseTable.getBuildingName() + courseTable.getClassroomName());
         json.put("lecturer", courseTable.getLecturer());
+        if (Objects.isNull(courseTable.getIsRescheduled())) {
+            json.put("isRescheduled", false);
+        } else {
+            json.put("isRescheduled", courseTable.getIsRescheduled());
+        }
         switch (courseTable.getWeekDay()) {
             case "周一":
                 res.add("monday");
@@ -423,6 +435,57 @@ public class CommonUtils {
                 return res;
             default:
                 return null;
+        }
+    }
+
+    public static List<ScheduledCourseTable> integrate(List<ScheduledCourseTable> tables1,
+                                                       List<List<ChangeCourseDto>> tables2, Integer currentWeek) {
+        List<ScheduledCourseTable> res = new ArrayList();
+        List<ChangeCourseDto> removedCourses = tables2.get(0);
+        List<ChangeCourseDto> transferredCourses = tables2.get(1);
+        for (ScheduledCourseTable courseTable : tables1) {
+            Boolean flag = true;
+            if (courseTable.getWeeksTotal() < currentWeek) {
+                continue;
+            }
+            if (Objects.equals(courseTable.getWeeksTotal(), currentWeek)) {
+                //前n-1周上的课次加上这周的课次大于总课次，说明已结课
+                if ((currentWeek - 1) * courseTable.getTimesOnceAWeek() + courseTable.getCurrentTimes()
+                        > courseTable.getTotalTimes()) {
+                    continue;
+                }
+            }
+            for (ChangeCourseDto item : removedCourses) {
+                if (Objects.equals(item.getCourse(), courseTable.getCourseName())
+                        && Objects.equals(item.getChangeWeekday(), courseTable.getWeekDay())
+                        && Objects.equals(item.getChangeCourseTime(), courseTable.getCourseTime())
+                ) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                res.add(courseTable);
+            }
+        }
+
+        for (ChangeCourseDto item1 : transferredCourses) {
+            res.add(new ScheduledCourseTable(item1));
+        }
+        return res;
+    }
+
+    public static String getMd5Url(MultipartFile file) throws IOException {
+        String md5 = SecureUtil.md5(file.getInputStream());
+        //md5（唯一标识） + '.' + 文件类型
+        return md5 + StrUtil.DOT + FileUtil.extName(file.getOriginalFilename());
+    }
+
+    public static void initParentFile(String filePath) {
+        File uploadParentFile = new File(filePath);
+        //不存在该文件夹就创建一个
+        if (!uploadParentFile.exists()) {
+            uploadParentFile.mkdir();
         }
     }
 }

@@ -1,8 +1,11 @@
 package com.plx.admin_system.controller;
 
 import com.plx.admin_system.entity.ApprovalingCourse;
+import com.plx.admin_system.entity.dto.ChangeCourseDto;
 import com.plx.admin_system.entity.dto.InfoDto;
+import com.plx.admin_system.entity.dto.PasswordForm;
 import com.plx.admin_system.entity.dto.ResponseResult;
+import com.plx.admin_system.service.CommonService;
 import com.plx.admin_system.service.ITeacherService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,12 +28,13 @@ import java.util.List;
 public class TeacherController {
     @Resource
     private ITeacherService teacherService;
+    @Resource
+    private CommonService commonService;
 
     @PostMapping("/course/approving/{pageSize}/{pageNum}")
     @PreAuthorize("hasAuthority('teacher')")
     public ResponseResult getCourseList(@RequestBody(required = false) ApprovalingCourse queryParams,
                                         @PathVariable Integer pageSize, @PathVariable Integer pageNum) {
-        System.out.println(queryParams);
         return new ResponseResult(HttpStatus.OK.value(), "查询成功",
                 teacherService.getCourseList(queryParams, pageSize, (pageNum - 1) * pageSize));
     }
@@ -70,19 +74,57 @@ public class TeacherController {
     }
 
     @GetMapping("/course/table/{current_week}")
+    @PreAuthorize("hasAuthority('teacher')")
     public ResponseResult getCourseTable(@PathVariable("current_week") Integer currentWeek) {
         return new ResponseResult(HttpStatus.OK.value(), "获取成功", teacherService.getCourseTable(currentWeek));
     }
 
     @GetMapping("/info")
+    @PreAuthorize("hasAuthority('teacher')")
     public ResponseResult getInfo() {
         return new ResponseResult(HttpStatus.OK.value(), "获取成功", teacherService.getInfo());
     }
 
     @PostMapping("/info/modify")
+    @PreAuthorize("hasAuthority('teacher')")
     public ResponseResult modifyInfo(@RequestBody InfoDto postForm) {
         return teacherService.saveInfo(postForm) ? new ResponseResult(HttpStatus.OK.value(), "修改成功") :
                 new ResponseResult(HttpStatus.FORBIDDEN.value(), "修改失败，请联系管理员");
 
+    }
+
+    @PostMapping("/modify/password")
+    @PreAuthorize("hasAuthority('teacher')")
+    public ResponseResult modifyPassword(@RequestBody PasswordForm passwordForm) {
+        if (commonService.verifyIdentity(passwordForm.getOldPassword())) {
+            return teacherService.modifyPassword(passwordForm) ? new ResponseResult(HttpStatus.OK.value(), "修改成功") :
+                    new ResponseResult(HttpStatus.FORBIDDEN.value(), "修改失败，请联系管理员");
+        }
+        return new ResponseResult(HttpStatus.FORBIDDEN.value(), "密码错误，请重新输入");
+    }
+
+    @PostMapping("/change/course/time")
+    @PreAuthorize("hasAuthority('teacher')")
+    public ResponseResult changeCourseTime(@RequestBody ChangeCourseDto form) {
+        return teacherService.changeCourseTime(form);
+    }
+
+    @PostMapping("/course/reschedule/record/{pageSize}/{pageNum}")
+    @PreAuthorize("hasAuthority('teacher')")
+    public ResponseResult getRecords(@RequestBody ChangeCourseDto form,
+                                     @PathVariable Integer pageSize, @PathVariable Integer pageNum) {
+        return teacherService.getRecords(form, pageSize, (pageNum - 1) * pageSize);
+    }
+
+    @DeleteMapping("/delete/record/{id}")
+    @PreAuthorize("hasAuthority('teacher')")
+    public ResponseResult deleteRecord(@PathVariable Integer id){
+        return teacherService.deleteRecord(id);
+    }
+
+    @PostMapping("/course/record/edit")
+    @PreAuthorize("hasAuthority('teacher')")
+    public ResponseResult editRecord(@RequestBody ChangeCourseDto form){
+        return teacherService.editRecord(form);
     }
 }

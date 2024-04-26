@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * <p>
@@ -21,6 +22,7 @@ import lombok.Setter;
 @Setter
 @Schema(name = "Student", description = "")
 @NoArgsConstructor
+@ToString
 public class Student extends User {
 
     private static final long serialVersionUID = 1L;

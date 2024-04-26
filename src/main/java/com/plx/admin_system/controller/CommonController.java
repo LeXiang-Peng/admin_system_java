@@ -6,7 +6,9 @@ import com.plx.admin_system.service.CommonService;
 import com.plx.admin_system.utils.CommonUtils;
 import com.plx.admin_system.utils.pojo.MenuList;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +27,7 @@ public class CommonController {
 
     @Resource
     CommonService commonService;
+
 
     @GetMapping("/captcha")
     public void getCaptchaImage(HttpServletResponse response, HttpSession session) {
@@ -54,5 +57,15 @@ public class CommonController {
     public ResponseResult logout() {
         return commonService.logout() ? new ResponseResult(HttpStatus.OK.value(), "登出成功")
                 : new ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), "出现错误，请联系管理人员");
+    }
+
+    @PostMapping("/upload")
+    public ResponseResult uploadAvatar(MultipartFile file) {
+        return commonService.uploadAvatar(file);
+    }
+
+    @GetMapping("/image/{fileName}")
+    public ResponseEntity<org.springframework.core.io.Resource> getAvatar(@PathVariable String fileName) {
+        return commonService.getAvatar(fileName);
     }
 }

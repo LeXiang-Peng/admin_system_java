@@ -1,10 +1,8 @@
 package com.plx.admin_system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.plx.admin_system.entity.Admin;
-import com.plx.admin_system.entity.ScheduledCourseTable;
-import com.plx.admin_system.entity.Student;
-import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.*;
+import com.plx.admin_system.entity.dto.DeleteDto;
 import com.plx.admin_system.entity.dto.EditForm;
 import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.views.*;
@@ -14,6 +12,7 @@ import com.plx.admin_system.utils.pojo.schduledCourse.SchedulingCourse;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.security.core.parameters.P;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -125,14 +124,13 @@ public interface AdminMapper extends BaseMapper<Admin> {
     Boolean resetTeacherPassword(Integer id);
 
     /**
-     * update one teacher 更新一条学生信息
-     * TODO 编辑功能
+     * update one teacher 更新一条教师信息
      *
      * @param id
-     * @param teacher
+     * @param editForm
      * @return Boolean
      */
-    Boolean updateOneTeacher(@Param("id") Integer id, Teacher teacher);
+    Boolean updateOneTeacher(@Param("teacherId") Integer id, @Param("editForm") EditForm editForm);
 
     /**
      * new teacher 创建一个新的教师
@@ -403,4 +401,154 @@ public interface AdminMapper extends BaseMapper<Admin> {
      * @return
      */
     Boolean saveInfo(@Param("info") InfoDto info, @Param("id") Integer id);
+
+    /**
+     * modify password 修改密码
+     *
+     * @param id
+     * @param newPassword
+     * @return
+     */
+    Boolean modifyPassword(@Param("id") Integer id, @Param("newPassword") String newPassword);
+
+    /**
+     * get departments 获取全部院系信息
+     *
+     * @param queryParams
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+    List<Department> getDepartments(@Param("queryParams") Department queryParams,
+                                    @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
+
+    /**
+     * rearrange 重新编排
+     *
+     * @param form
+     * @return
+     */
+    Boolean rearrange(@Param("form") ScheduledCourseTable form);
+
+    /**
+     * get profession 获取专业信息
+     *
+     * @param queryParams
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+    List<Profession> getProfessions(@Param("queryParams") Profession queryParams,
+                                    @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
+
+    /**
+     * get clazz list 获取班级信息
+     *
+     * @param queryParams
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+    List<Clazz> getClazzList(@Param("queryParams") Clazz queryParams,
+                             @Param("pageSize") Integer pageSize, @Param("pageNum") Integer pageNum);
+
+    /**
+     * edit department 编辑院系信息
+     *
+     * @param form
+     * @return
+     */
+    Boolean editDepartment(@Param("form") EditForm form);
+
+    /**
+     * delete department 删除院系信息
+     *
+     * @param id
+     * @return
+     */
+    Boolean deleteDepartment(@Param("id") List<Integer> id);
+
+    /**
+     * new department 新增院系信息
+     *
+     * @param newDepartment
+     * @return
+     */
+    Boolean newDepartment(@Param("newDepartment") Department newDepartment);
+
+    /**
+     * new profession 新增专业信息
+     *
+     * @param form
+     * @return
+     */
+    Boolean newProfession(@Param("form") Profession form);
+
+    /**
+     * new clazz 新增班级信息
+     *
+     * @param form
+     * @return
+     */
+    Boolean newClazz(@Param("form") Clazz form);
+
+    /**
+     * delete clazz 删除班级信息
+     *
+     * @param id
+     * @return
+     */
+    Boolean deleteClazz(@Param("id") List<Integer> id);
+
+    /**
+     * delete profession 删除专业信息
+     *
+     * @param id
+     * @return
+     */
+    Boolean deleteProfession(@Param("id") List<Integer> id);
+
+    /**
+     * edit profession 编辑专业信息
+     *
+     * @param form
+     * @return
+     */
+    Boolean editProfession(@Param("form") EditForm form);
+
+    /**
+     * edit clazz 编辑班级信息
+     *
+     * @param form
+     * @return
+     */
+    Boolean editClazz(@Param("form") EditForm form);
+
+    /**
+     * get all departments 获取全部院系信息
+     *
+     * @return
+     */
+    List<String> getAllDepartments();
+
+    /**
+     * get all professions
+     *
+     * @return
+     */
+    List<Profession> getAllProfessions();
+
+    /**
+     * get all clazz 获取班级信息
+     *
+     * @return
+     */
+    List<Clazz> getAllClazz();
+
+    /**
+     * update student total 更新学生人数
+     *
+     * @return
+     */
+    Boolean updateStudentTotal();
 }

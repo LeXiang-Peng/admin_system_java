@@ -66,6 +66,18 @@
         insert into approvaling_course(<include refid="pendingCourseKey"></include>)
         value (<include refid="pendingCourseValue"></include>)
     </insert>
+    <insert id="changeCourrseTime">
+        insert
+        into change_course_time(course_id, course_name, lecturer_id, lecturer, building_name, classroom_name,
+                                change_week,
+                                change_weekday, change_course_time, curr_week, weekday, course_time, semester)
+            value (#{form.courseId}, #{form.course}, #{form.lecturerId}, #{form.lecturer}, #{form.building},#{form.classroom},
+            #{form.changeWeek}, #{form.changeWeekday}, #{form.changeCourseTime}, #{form.currWeek},
+            #{form.weekday}, #{form.courseTime},
+        (select semester
+            from course
+            where course_id = #{form.courseId}));
+    </insert>
 
     <update id="cancelCourse">
         update approvaling_course
@@ -104,6 +116,11 @@
             #{item}
         </foreach>
     </delete>
+    <delete id="deleteRecord">
+        delete
+        from change_course_time
+        where change_course_time_id = #{id}
+    </delete>
 
     <select id="getCourseList" resultMap="coursesMap,total2">
         select sql_calc_found_rows approvaling_course_id, clazz_name, course_name, category, remark, course_type,
@@ -130,17 +147,53 @@
                            on scheduled_course.course_id = info.course_id
         where scheduled_course.course_id is not null;
     </select>
-    <resultMap id="studentInfoMap" type="com.plx.admin_system.entity.dto.InfoDto">
-        <result column="teacher_name" property="name" jdbcType="VARCHAR"></result>
-        <result column="teacher_phone_number" property="phone" jdbcType="VARCHAR"></result>
-        <result column="teacher_email" property="email" jdbcType="VARCHAR"></result>
-    </resultMap>
-    <select id="getInfo" resultType="java.util.HashMap">
+
+    <select id="getInfo" resultType="com.plx.admin_system.entity.dto.InfoDto">
         select teacher_name         as name,
                teacher_phone_number as phone,
-               teacher_email        as email
+               teacher_email        as email,
+               avatar_url           as avatar_url
         from teacher
         where teacher_id = #{id}
+    </select>
+
+    <resultMap id="changeCourseMap" type="com.plx.admin_system.entity.dto.ChangeCourseDto">
+        <result column="change_course_time_id" property="id" jdbcType="INTEGER"></result>
+        <result column="course_id" property="courseId" jdbcType="INTEGER"></result>
+        <result column="course_name" property="course" jdbcType="VARCHAR"></result>
+        <result column="lecturer_id" property="lecturerId" jdbcType="INTEGER"></result>
+        <result column="lecturer" property="lecturer" jdbcType="VARCHAR"></result>
+        <result column="classroom_name" property="classroom" jdbcType="VARCHAR"></result>
+        <result column="building_name" property="building" jdbcType="VARCHAR"></result>
+        <result column="change_week" property="changeWeek" jdbcType="INTEGER"></result>
+        <result column="change_weekday" property="changeWeekday" jdbcType="VARCHAR"></result>
+        <result column="change_course_time" property="changeCourseTime" jdbcType="VARCHAR"></result>
+        <result column="curr_week" property="currWeek" jdbcType="INTEGER"></result>
+        <result column="weekday" property="weekday" jdbcType="VARCHAR"></result>
+    </resultMap>
+
+    <select id="getChangeCourseTable" resultMap="changeCourseMap,changeCourseMap">
+        select *
+        from change_course_time
+        where lecturer_id = #{id}
+          and change_week = #{week};
+        select *
+        from change_course_time
+        where lecturer_id = #{id}
+          and curr_week = #{week};
+    </select>
+    <select id="getRecords" resultMap="changeCourseMap">
+        select * from change_course_time
+        <where>
+            lecturer_id = #{id}
+            <if test="form.courseId != null">
+                and course_id = #{form.courseId}
+            </if>
+            <if test="form.course != null and form.course != ''">
+                and course_name like concat('%',#{form.course},'%')
+            </if>
+        </where>
+        limit #{pageNum}, #{pageSize};
     </select>
 
     <update id="saveInfo">
@@ -157,5 +210,31 @@
             </if>
         </set>
         where teacher_id = #{id}
+    </update>
+    <update id="modifyPassword">
+        update teacher
+        set teacher_password =#{newPassword}
+        where teacher_id = #{id}
+    </update>
+    <update id="editRecord">
+        update change_course_time
+        <set>
+            <if test="form.building != null and form.building != ''">
+                building_name = #{form.building},
+            </if>
+            <if test="form.classroom != null and form.classroom != ''">
+                classroom_name = #{form.classroom},
+            </if>
+            <if test="form.currWeek != null">
+                curr_week = #{form.currWeek},
+            </if>
+            <if test="form.weekday != null and form.weekday != ''">
+                weekday = #{form.weekday},
+            </if>
+            <if test="form.courseTime != null and form.courseTime != ''">
+                course_time = #{form.courseTime},
+            </if>
+        </set>
+        where change_course_time_id =#{form.id}
     </update>
 </mapper>

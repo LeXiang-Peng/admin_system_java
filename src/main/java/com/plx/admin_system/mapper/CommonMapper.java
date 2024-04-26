@@ -5,7 +5,6 @@ import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
 import com.plx.admin_system.entity.views.Menu;
 import com.plx.admin_system.entity.views.ScheduledCourseInfo;
-import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
 import com.plx.admin_system.utils.pojo.schduledCourse.CourseTask;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
@@ -126,4 +125,39 @@ public interface CommonMapper {
      * @return
      */
     List<ScheduledCourseInfo> getScheduledCourseInfo();
+
+    /**
+     * get avatar url 获取头像url
+     *
+     * @param url
+     * @return
+     */
+    List<String> getAvatarUrl(@Param("url") String url);
+
+    /**
+     * upload admin avatar 上传管理员头像
+     *
+     * @param url
+     * @param id
+     * @return
+     */
+    Boolean uploadAdminAvatar(@Param("url") String url, @Param("id") Integer id);
+
+    /**
+     * upload student avatar 上传学生头像
+     *
+     * @param url
+     * @param id
+     * @return
+     */
+    Boolean uploadStudentAvatar(@Param("url") String url, @Param("id") Integer id);
+
+    /**
+     * upload teacher avatar 上传教师头像
+     *
+     * @param url
+     * @param id
+     * @return
+     */
+    Boolean uploadTeacherAvatar(@Param("url") String url, @Param("id") Integer id);
 }

@@ -3,7 +3,11 @@ package com.plx.admin_system.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.plx.admin_system.entity.ApprovalingCourse;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.dto.ChangeCourseDto;
 import com.plx.admin_system.entity.dto.InfoDto;
+import com.plx.admin_system.entity.dto.PasswordForm;
+import com.plx.admin_system.entity.dto.ResponseResult;
+import io.swagger.models.auth.In;
 
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +84,7 @@ public interface ITeacherService extends IService<Teacher> {
      *
      * @return
      */
-    HashMap getInfo();
+    InfoDto getInfo();
 
     /**
      * save info 保存教师信息
@@ -89,4 +93,43 @@ public interface ITeacherService extends IService<Teacher> {
      * @return
      */
     Boolean saveInfo(InfoDto info);
+
+    /**
+     * modify password 修改密码
+     *
+     * @param passwordForm
+     * @return
+     */
+    Boolean modifyPassword(PasswordForm passwordForm);
+
+    /**
+     * change course time 调课
+     *
+     * @param form
+     * @return
+     */
+    ResponseResult changeCourseTime(ChangeCourseDto form);
+
+    /**
+     * get records 获取调课记录
+     *
+     * @return
+     */
+    ResponseResult getRecords(ChangeCourseDto form, Integer pageSize, Integer pageNum);
+
+    /**
+     * delete record 删除调课记录
+     *
+     * @param id
+     * @return
+     */
+    ResponseResult deleteRecord(Integer id);
+
+    /**
+     * edit record 编辑调课记录
+     *
+     * @param form
+     * @return
+     */
+    ResponseResult editRecord(ChangeCourseDto form);
 }

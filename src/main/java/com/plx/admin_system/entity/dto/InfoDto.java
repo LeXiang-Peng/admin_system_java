@@ -16,4 +16,6 @@ public class InfoDto {
     private String email;
     @JsonProperty("IDNumber")
     private String IDNumber;
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
 }

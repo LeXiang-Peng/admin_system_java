@@ -3,6 +3,7 @@ package com.plx.admin_system.service.impl;
 import com.plx.admin_system.entity.Admin;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.Teacher;
+import com.plx.admin_system.entity.User;
 import com.plx.admin_system.entity.dto.MyUserDetails;
 import com.plx.admin_system.mapper.CommonMapper;
 import com.plx.admin_system.service.UserDetailsService;

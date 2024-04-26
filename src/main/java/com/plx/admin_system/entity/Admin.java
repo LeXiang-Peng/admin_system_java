@@ -7,10 +7,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author plx
@@ -18,6 +19,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 @Schema(name = "Admin", description = "")
 public class Admin extends User {
 

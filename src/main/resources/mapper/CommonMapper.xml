@@ -7,6 +7,36 @@
         <result column="parent_menu_id" property="parentMenuId"></result>
     </resultMap>
 
+
+    <update id="uploadAdminAvatar">
+        update admin
+        <set>
+            <if test="url != null and url != ''">
+                avatar_url = #{url},
+            </if>
+        </set>
+        where admin_id = #{id} and (avatar_url &lt;&gt; #{url} or avatar_url is null)
+    </update>
+    <update id="uploadStudentAvatar">
+        update student
+        <set>
+            <if test="url != null and url != ''">
+                avatar_url = #{url},
+            </if>
+        </set>
+        where admin_id = #{id} and (avatar_url &lt;&gt; #{url} or avatar_url is null)
+    </update>
+
+    <update id="uploadTeacherAvatar">
+        update teacher
+        <set>
+            <if test="url != null and url != ''">
+                avatar_url = #{url},
+            </if>
+        </set>
+        where admin_id = #{id} and (avatar_url &lt;&gt; #{url} or avatar_url is null)
+    </update>
+
     <select id="getOneStudentById" resultType="com.plx.admin_system.entity.Student">
         select student_id, student_name, student_password
         from student
@@ -105,6 +135,22 @@
         select *
         from scheduled_course_info
     </select>
+    <select id="getAvatarUrl" resultType="java.lang.String">
+        (select avatar_url
+         from admin
+         where avatar_url is not null
+           and avatar_url = #{url})
+        union all
+        (select avatar_url
+         from student
+         where avatar_url is not null
+           and avatar_url = #{url})
+        union all
+        (select avatar_url
+         from teacher
+         where avatar_url is not null
+           and avatar_url = #{url})
+    </select>
 
     <delete id="resetCourseTable">
         update course
@@ -117,5 +163,6 @@
                from course
                where !is_completed)
     </delete>
+
 
 </mapper>

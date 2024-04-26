@@ -22,6 +22,6 @@ public class StudentView implements Serializable {
     private String department;
     @Excel(name = "性别", width = 10.0, orderNum = "5")
     private String gender;
-    @Excel(name = "学年", width = 25.0, orderNum = "5")
+    @Excel(name = "学年", width = 25.0, orderNum = "6")
     private String grade;
 }

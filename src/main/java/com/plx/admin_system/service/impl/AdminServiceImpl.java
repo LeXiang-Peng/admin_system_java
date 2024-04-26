@@ -1,14 +1,8 @@
 package com.plx.admin_system.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.plx.admin_system.entity.Admin;
-import com.plx.admin_system.entity.ScheduledCourseTable;
-import com.plx.admin_system.entity.Student;
-import com.plx.admin_system.entity.Teacher;
-import com.plx.admin_system.entity.dto.EditForm;
-import com.plx.admin_system.entity.dto.InfoDto;
-import com.plx.admin_system.entity.dto.MyUserDetails;
-import com.plx.admin_system.entity.dto.ResponseResult;
+import com.plx.admin_system.entity.*;
+import com.plx.admin_system.entity.dto.*;
 import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.mapper.AdminMapper;
 import com.plx.admin_system.mapper.CommonMapper;
@@ -86,16 +80,6 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         return adminMapper.resetStudentPassword(id);
     }
 
-    @Override
-    public Boolean verifyIdentity(String password) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
-        if (passwordEncoder.matches(password, loginUser.getPassword())) {
-            return true;
-        }
-        return false;
-    }
 
     @Override
     public String getPermission() {
@@ -129,7 +113,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         student.setGrade("第四学年下学期(可以不填，系统会自动识别)");
         student.setGender("男/女");
         students.add(student);
-        CommonUtils.exportData(StudentView.class, students, "学生信息表.xlsx", "学生列表",
+        CommonUtils.exportData(StudentView.class, students, "学生样例表.xlsx", "学生列表",
                 "学生信息表", response);
     }
 
@@ -209,7 +193,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         teacher.setDepartment("信息与工程学院(必填!!!)");
         teacher.setGender("男/女");
         teachers.add(teacher);
-        CommonUtils.exportData(TeacherView.class, teachers, "教师信息表.xlsx", "教师列表",
+        CommonUtils.exportData(TeacherView.class, teachers, "教师样例表.xlsx", "教师列表",
                 "教师信息表", response);
     }
 
@@ -219,7 +203,6 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         if (teachers.size() == 0) {
             return new ResponseResult(HttpStatus.FORBIDDEN.value(), "上传文件为空，请重新上传");
         }
-
         SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
         AdminMapper mapper = sqlSession.getMapper(AdminMapper.class);
         //批处理
@@ -422,7 +405,8 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         List<ClassroomInfo> classroomInfoList = (List<ClassroomInfo>) list.get(0);
         Integer classroomListSize = (Integer) list.get(1).get(0);
         //已编排的课程
-        List<CourseTask> scheduledCourses = CommonUtils.initCourseList(commonMapper.getScheduledCourseInfo(), classroomInfoList);
+        List<CourseTask> scheduledCourses =
+                CommonUtils.initCourseList(commonMapper.getScheduledCourseInfo(), classroomInfoList);
         //待编排的课程
         List<CourseTask> tasks = new ArrayList<>();
         tasks = CommonUtils.initOneTask(tasks, CommonUtils.initOneCourseInfo(info));
@@ -449,6 +433,210 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         return adminMapper.updateOneStudent(studentId, editForm) ?
                 new ResponseResult(HttpStatus.OK.value(), "保存成功")
                 : new ResponseResult(HttpStatus.FORBIDDEN.value(), "保存失败，请联系管理人员");
+    }
+
+    @Override
+    public ResponseResult saveTeacherInfo(Integer teacherId, EditForm editForm) {
+        return adminMapper.updateOneTeacher(teacherId, editForm) ?
+                new ResponseResult(HttpStatus.OK.value(), "保存成功")
+                : new ResponseResult(HttpStatus.FORBIDDEN.value(), "保存失败，请联系管理人员");
+    }
+
+    @Override
+    public Boolean modifyPassword(PasswordForm passwordForm) {
+        UserAuthenticationToken token = (UserAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        MyUserDetails loginUser = (MyUserDetails) token.getPrincipal();
+        //加密
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return adminMapper.modifyPassword(loginUser.getUserId(), passwordEncoder.encode(passwordForm.getNewPassword()));
+    }
+
+    @Override
+    public List<Department> getDepartments(Department queryParams, Integer pageSize, Integer pageNum) {
+        return adminMapper.getDepartments(queryParams, pageSize, pageNum);
+    }
+
+    @Override
+    public Boolean rearrange(ScheduledCourseTable form) {
+        return adminMapper.rearrange(form);
+    }
+
+    @Override
+    public List<Profession> getProfessions(Profession queryParams, Integer pageSize, Integer pageNum) {
+        return adminMapper.getProfessions(queryParams, pageSize, pageNum);
+    }
+
+    @Override
+    public List<Clazz> getClazzs(Clazz queryParams, Integer pageSize, Integer pageNum) {
+        return adminMapper.getClazzList(queryParams, pageSize, pageNum);
+    }
+
+    @Override
+    public ResponseResult editDepartment(EditForm form) {
+        return adminMapper.editDepartment(form) ? new ResponseResult(HttpStatus.OK.value(), "编辑成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "编辑失败，请联系管理人员");
+    }
+
+    @Override
+    public Boolean deleteDepartment(DeleteDto form) {
+        return adminMapper.deleteDepartment(form.getId());
+    }
+
+    @Override
+    public Boolean newDepartment(String newDepartment) {
+        try {
+            return adminMapper.newDepartment(new Department(newDepartment));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public void exportSampleDepartmentExcel(HttpServletResponse response) {
+        List<Department> departments = new ArrayList<Department>();
+        Department department = new Department();
+        department.setDepartmentId(8);
+        department.setDepartmentName("导出样例");
+        departments.add(department);
+        CommonUtils.exportData(Department.class, departments, "院系样例表.xlsx", "院系列表",
+                "院系信息表", response);
+    }
+
+    @Override
+    public ResponseResult importDepartments(MultipartFile file) {
+        List<Department> departments = CommonUtils.importData(Department.class, file);
+        if (departments.size() == 0) {
+            return new ResponseResult(HttpStatus.FORBIDDEN.value(), "上传文件为空，请重新上传");
+        }
+
+        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+        AdminMapper mapper = sqlSession.getMapper(AdminMapper.class);
+        //批处理
+        departments.stream().forEach(department -> mapper.newDepartment(department));
+        return CommonUtils.commit(sqlSession, "导入成功", "文件信息有误，请重新上传");
+    }
+
+    @Override
+    public Boolean newProfession(Profession form) {
+        try {
+            return adminMapper.newProfession(form);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean newClazz(Clazz form) {
+        try {
+            return adminMapper.newClazz(form);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean deleteClazz(DeleteDto form) {
+        return adminMapper.deleteClazz(form.getId());
+    }
+
+    @Override
+    public Boolean deleteProfession(DeleteDto form) {
+        return adminMapper.deleteProfession(form.getId());
+    }
+
+    @Override
+    public ResponseResult editProfession(EditForm form) {
+        return adminMapper.editProfession(form) ? new ResponseResult(HttpStatus.OK.value(), "编辑成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "编辑失败，请联系管理人员");
+    }
+
+    @Override
+    public ResponseResult editClazz(EditForm form) {
+        return adminMapper.editClazz(form) ? new ResponseResult(HttpStatus.OK.value(), "编辑成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "编辑失败，请联系管理人员");
+    }
+
+    @Override
+    public List<String> getAllDepartments() {
+        return adminMapper.getAllDepartments();
+    }
+
+    @Override
+    public void exportSampleProfessionExcel(HttpServletResponse response) {
+        List<Profession> professions = new ArrayList<Profession>();
+        Profession profession = new Profession();
+        profession.setProfessionId(8);
+        profession.setProfessionName("样例");
+        profession.setDepartmentName("必填！！！");
+        professions.add(profession);
+        CommonUtils.exportData(Profession.class, professions, "专业样例表.xlsx", "专业列表",
+                "专业信息表", response);
+    }
+
+    @Override
+    public void exportProfessionExcel(HttpServletResponse response) {
+        List<Profession> professions = adminMapper.getAllProfessions();
+        CommonUtils.exportData(Profession.class, professions, "专业信息表.xlsx", "专业列表",
+                "专业信息表", response);
+    }
+
+    @Override
+    public ResponseResult importProfessions(MultipartFile file) {
+        List<Profession> professions = CommonUtils.importData(Profession.class, file);
+        if (professions.size() == 0) {
+            return new ResponseResult(HttpStatus.FORBIDDEN.value(), "上传文件为空，请重新上传");
+        }
+        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+        AdminMapper mapper = sqlSession.getMapper(AdminMapper.class);
+        //批处理
+        professions.stream().forEach(profession -> mapper.newProfession(profession));
+        return CommonUtils.commit(sqlSession, "导入成功", "文件信息有误，请重新上传");
+    }
+
+    @Override
+    public List<Profession> getAllProfessions() {
+        return adminMapper.getAllProfessions();
+    }
+
+    @Override
+    public void exportClazzExcel(HttpServletResponse response) {
+        List<Clazz> clazzes = adminMapper.getAllClazz();
+        CommonUtils.exportData(Clazz.class, clazzes, "班级信息表.xlsx", "班级列表",
+                "班级信息表", response);
+    }
+
+    @Override
+    public void exportSampleClazzExcel(HttpServletResponse response) {
+        List<Clazz> clazzes = new ArrayList<>();
+        Clazz clazz = new Clazz();
+        clazz.setClazzId(8);
+        clazz.setClazzName("样例");
+        clazz.setProfessionName("专业样例");
+        clazz.setDepartmentName("院系样例");
+        clazz.setCurrentSemester("第四学年");
+        clazz.setStudentTotal(50);
+        clazzes.add(clazz);
+        CommonUtils.exportData(Clazz.class, clazzes, "班级样例表.xlsx", "班级列表",
+                "班级信息表", response);
+    }
+
+    @Override
+    public ResponseResult importClazz(MultipartFile file) {
+        List<Clazz> clazzes = CommonUtils.importData(Clazz.class, file);
+        if (clazzes.size() == 0) {
+            return new ResponseResult(HttpStatus.FORBIDDEN.value(), "上传文件为空，请重新上传");
+        }
+        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+        AdminMapper mapper = sqlSession.getMapper(AdminMapper.class);
+        //批处理
+        clazzes.stream().forEach(clazz -> mapper.newClazz(clazz));
+        return CommonUtils.commit(sqlSession, "导入成功", "文件信息有误，请重新上传");
+    }
+
+    @Override
+    public ResponseResult updateStudentTotal() {
+        return adminMapper.updateStudentTotal() ? new ResponseResult(HttpStatus.OK.value(), "更新成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "更新失败");
     }
 }
 

@@ -10,5 +10,7 @@ public class EditForm {
     private Integer id;
     private String name;
     private String clazz;
+    private String profession;
+    private String department;
     private String gender;
 }

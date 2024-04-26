@@ -1,14 +1,9 @@
 package com.plx.admin_system.controller;
 
-import com.plx.admin_system.entity.Admin;
-import com.plx.admin_system.entity.ScheduledCourseTable;
-import com.plx.admin_system.entity.Student;
-import com.plx.admin_system.entity.Teacher;
-import com.plx.admin_system.entity.dto.DeleteDto;
-import com.plx.admin_system.entity.dto.EditForm;
-import com.plx.admin_system.entity.dto.InfoDto;
-import com.plx.admin_system.entity.dto.ResponseResult;
+import com.plx.admin_system.entity.*;
+import com.plx.admin_system.entity.dto.*;
 import com.plx.admin_system.entity.views.*;
+import com.plx.admin_system.service.CommonService;
 import com.plx.admin_system.service.IAdminService;
 import com.plx.admin_system.utils.CommonUtils;
 import com.plx.admin_system.utils.pojo.schduledCourse.SchedulingCourse;
@@ -35,6 +30,8 @@ import java.util.Objects;
 public class AdminController {
     @Resource
     private IAdminService adminService;
+    @Resource
+    private CommonService commonService;
 
     @PostMapping("/student/list/{pageSize}/{pageNum}")
     @PreAuthorize("hasAuthority('admin')")
@@ -60,7 +57,7 @@ public class AdminController {
     @PostMapping("/student/delete")
     @PreAuthorize("hasAuthority('admin')")
     public ResponseResult deleteStudents(@RequestBody DeleteDto form) {
-        if (adminService.verifyIdentity(form.getPassword())) {
+        if (commonService.verifyIdentity(form.getPassword())) {
             return adminService.deleteStudents(form.getId()) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
                     new ResponseResult(HttpStatus.FORBIDDEN.value(), "删除失败，请联系管理人员");
         }
@@ -129,7 +126,7 @@ public class AdminController {
     @PostMapping("/teacher/delete")
     @PreAuthorize("hasAuthority('admin')")
     public ResponseResult deleteTeachers(@RequestBody DeleteDto form) {
-        if (adminService.verifyIdentity(form.getPassword())) {
+        if (commonService.verifyIdentity(form.getPassword())) {
             String permission = adminService.getPermission();
             if (CommonUtils.IDENTITY_ADMIN.equals(permission)) {
                 return adminService.deleteNonAdminTeachers(form.getId()) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
@@ -190,7 +187,7 @@ public class AdminController {
     @PostMapping("/delete")
     @PreAuthorize("hasAuthority('adminPlus')")
     public ResponseResult deleteAdmins(@RequestBody DeleteDto form) {
-        if (adminService.verifyIdentity(form.getPassword())) {
+        if (commonService.verifyIdentity(form.getPassword())) {
             return adminService.deleteAdmins(form.getId()) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
                     new ResponseResult(HttpStatus.FORBIDDEN.value(), "删除失败，请联系管理人员");
         }
@@ -332,6 +329,7 @@ public class AdminController {
     }
 
     @PostMapping("/info/modify")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseResult modifyInfo(@RequestBody InfoDto postForm) {
         return adminService.saveInfo(postForm) ? new ResponseResult(HttpStatus.OK.value(), "修改成功") :
                 new ResponseResult(HttpStatus.FORBIDDEN.value(), "修改失败，请联系管理员");
@@ -339,17 +337,203 @@ public class AdminController {
     }
 
     @GetMapping("/classroom")
+    @RolesAllowed({"admin", "teacher"})
     public ResponseResult getClassroomInfo() {
         return new ResponseResult(HttpStatus.OK.value(), "获取成功", adminService.getClassroomInfo());
     }
 
     @PostMapping("/course/single/generate/ga")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseResult generateSingleCourseByGA(@RequestBody SchedulingCourse info) {
         return adminService.arrangeSingleCourseByGA(info);
     }
 
     @PostMapping("/student/save/info/{studentId}")
+    @PreAuthorize("hasAuthority('admin')")
     public ResponseResult saveStudentInfo(@PathVariable Integer studentId, @RequestBody EditForm editForm) {
         return adminService.saveStudentInfo(studentId, editForm);
+    }
+
+    @PostMapping("/teacher/save/info/{teacherId}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult saveTeacherInfo(@PathVariable Integer teacherId, @RequestBody EditForm editForm) {
+        return adminService.saveTeacherInfo(teacherId, editForm);
+    }
+
+    @PostMapping("/modify/password")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult modifyPassword(@RequestBody PasswordForm passwordForm) {
+        if (commonService.verifyIdentity(passwordForm.getOldPassword())) {
+            return adminService.modifyPassword(passwordForm) ? new ResponseResult(HttpStatus.OK.value(), "修改成功") :
+                    new ResponseResult(HttpStatus.FORBIDDEN.value(), "修改失败，请联系管理员");
+        }
+        return new ResponseResult(HttpStatus.FORBIDDEN.value(), "密码错误，请重新输入");
+    }
+
+    @PostMapping("/course/rearrange")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult rearrange(@RequestBody ScheduledCourseTable form) {
+        return adminService.rearrange(form) ? new ResponseResult(HttpStatus.OK.value(), "重新安排成功") :
+                new ResponseResult(HttpStatus.FORBIDDEN.value(), "重新安排失败");
+    }
+
+    @PostMapping("/department/{pageSize}/{pageNum}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getDepartments(@RequestBody Department queryParams, @PathVariable Integer pageSize,
+                                         @PathVariable Integer pageNum) {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功",
+                adminService.getDepartments(queryParams, pageSize, (pageNum - 1) * pageSize));
+    }
+
+    @PostMapping("/profession/{pageSize}/{pageNum}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getProfessions(@RequestBody Profession queryParams, @PathVariable Integer pageSize,
+                                         @PathVariable Integer pageNum) {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功",
+                adminService.getProfessions(queryParams, pageSize, (pageNum - 1) * pageSize));
+    }
+
+    @PostMapping("/clazz/{pageSize}/{pageNum}")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getClazzs(@RequestBody Clazz queryParams, @PathVariable Integer pageSize,
+                                    @PathVariable Integer pageNum) {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功",
+                adminService.getClazzs(queryParams, pageSize, (pageNum - 1) * pageSize));
+    }
+
+    @PostMapping("/department/edit")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult editDepartment(@RequestBody EditForm form) {
+        return adminService.editDepartment(form);
+    }
+
+    @PostMapping("/department/delete")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult deleteDepartment(@RequestBody DeleteDto form) {
+        if (commonService.verifyIdentity(form.getPassword())) {
+            return adminService.deleteDepartment(form) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
+                    new ResponseResult(HttpStatus.FORBIDDEN.value(), "删除失败，请联系管理人员");
+        }
+        return new ResponseResult(HttpStatus.FORBIDDEN.value(), "密码错误，请重新输入");
+    }
+
+    @PostMapping("/department/new")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult newDepartment(@RequestParam String newDepartment) {
+        return adminService.newDepartment(newDepartment) ? new ResponseResult(HttpStatus.OK.value(), "新增成功")
+                : new ResponseResult(HttpStatus.FORBIDDEN.value(), "新增失败，请联系管理人员");
+    }
+
+    @PostMapping("/profession/new")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult newProfession(@RequestBody Profession form) {
+        return adminService.newProfession(form) ? new ResponseResult(HttpStatus.OK.value(), "新增成功")
+                : new ResponseResult(HttpStatus.FORBIDDEN.value(), "新增失败，请联系管理人员");
+    }
+
+    @PostMapping("/clazz/new")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult newClazz(@RequestBody Clazz form) {
+        System.out.println(form);
+        return adminService.newClazz(form) ? new ResponseResult(HttpStatus.OK.value(), "新增成功")
+                : new ResponseResult(HttpStatus.FORBIDDEN.value(), "新增失败，请联系管理人员");
+    }
+
+    @GetMapping("/department/sample/export")
+    @PreAuthorize("hasAuthority('admin')")
+    public void exportSampleDepartmentExcel(HttpServletResponse response) {
+        adminService.exportSampleDepartmentExcel(response);
+    }
+
+    @PostMapping("/department/import")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult importDepartments(MultipartFile file) {
+        return adminService.importDepartments(file);
+    }
+
+    @PostMapping("/profession/delete")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult deleteProfession(@RequestBody DeleteDto form) {
+        if (commonService.verifyIdentity(form.getPassword())) {
+            return adminService.deleteProfession(form) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
+                    new ResponseResult(HttpStatus.FORBIDDEN.value(), "删除失败，请联系管理人员");
+        }
+        return new ResponseResult(HttpStatus.FORBIDDEN.value(), "密码错误，请重新输入");
+    }
+
+    @PostMapping("/clazz/delete")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult deleteClazz(@RequestBody DeleteDto form) {
+        System.out.println(form);
+        if (commonService.verifyIdentity(form.getPassword())) {
+            return adminService.deleteClazz(form) ? new ResponseResult(HttpStatus.OK.value(), "删除成功") :
+                    new ResponseResult(HttpStatus.FORBIDDEN.value(), "删除失败，请联系管理人员");
+        }
+        return new ResponseResult(HttpStatus.FORBIDDEN.value(), "密码错误，请重新输入");
+    }
+
+    @PostMapping("/clazz/edit")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult editClazz(@RequestBody EditForm form) {
+        return adminService.editClazz(form);
+    }
+
+    @PostMapping("/profession/edit")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult editProfession(@RequestBody EditForm form) {
+        return adminService.editProfession(form);
+    }
+
+    @GetMapping("/department/selected/list")
+    public ResponseResult getAllDepartment() {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功", adminService.getAllDepartments());
+    }
+
+    @GetMapping("/profession/sample/export")
+    @PreAuthorize("hasAuthority('admin')")
+    public void exportSampleProfessionExcel(HttpServletResponse response) {
+        adminService.exportSampleProfessionExcel(response);
+    }
+
+    @GetMapping("/profession/export")
+    @PreAuthorize("hasAuthority('admin')")
+    public void exportProfessionExcel(HttpServletResponse response) {
+        adminService.exportProfessionExcel(response);
+    }
+
+    @PostMapping("/profession/import")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult importProfessions(MultipartFile file) {
+        return adminService.importProfessions(file);
+    }
+
+    @GetMapping("/profession/list")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult getAllProfessions() {
+        return new ResponseResult(HttpStatus.OK.value(), "获取成功", adminService.getAllProfessions());
+    }
+
+    @GetMapping("/clazz/export")
+    @PreAuthorize("hasAuthority('admin')")
+    public void exportClazzExcel(HttpServletResponse response) {
+        adminService.exportClazzExcel(response);
+    }
+
+    @GetMapping("/clazz/sample/export")
+    @PreAuthorize("hasAuthority('admin')")
+    public void exportSampleClazzExcel(HttpServletResponse response) {
+        adminService.exportSampleClazzExcel(response);
+    }
+
+    @PostMapping("/clazz/import")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult importClazz(MultipartFile file) {
+        return adminService.importClazz(file);
+    }
+
+    @GetMapping("/clazz/update/total")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseResult updateStudentTotal() {
+        return adminService.updateStudentTotal();
     }
 }

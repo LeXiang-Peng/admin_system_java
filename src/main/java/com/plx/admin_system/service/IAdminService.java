@@ -1,13 +1,8 @@
 package com.plx.admin_system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.plx.admin_system.entity.Admin;
-import com.plx.admin_system.entity.ScheduledCourseTable;
-import com.plx.admin_system.entity.Student;
-import com.plx.admin_system.entity.Teacher;
-import com.plx.admin_system.entity.dto.EditForm;
-import com.plx.admin_system.entity.dto.InfoDto;
-import com.plx.admin_system.entity.dto.ResponseResult;
+import com.plx.admin_system.entity.*;
+import com.plx.admin_system.entity.dto.*;
 import com.plx.admin_system.entity.views.*;
 import com.plx.admin_system.utils.pojo.schduledCourse.ClassroomInfo;
 import com.plx.admin_system.utils.pojo.schduledCourse.SchedulingCourse;
@@ -68,14 +63,6 @@ public interface IAdminService extends IService<Admin> {
      * @return
      */
     Boolean resetStudentPassword(Integer id);
-
-    /**
-     * verify identity 身份验证
-     *
-     * @param password
-     * @return Boolean
-     */
-    Boolean verifyIdentity(String password);
 
     /**
      * get permission
@@ -405,9 +392,213 @@ public interface IAdminService extends IService<Admin> {
     ResponseResult arrangeSingleCourseByGA(SchedulingCourse info);
 
     /**
+     * save student info 保存学生信息
      *
      * @param editForm
      * @return
      */
-    ResponseResult saveStudentInfo(Integer studentId,EditForm editForm);
+    ResponseResult saveStudentInfo(Integer studentId, EditForm editForm);
+
+    /**
+     * save teacher info 保存教师信息
+     *
+     * @param teacherId
+     * @param editForm
+     * @return
+     */
+    ResponseResult saveTeacherInfo(Integer teacherId, EditForm editForm);
+
+    /**
+     * modify password 修改密码
+     *
+     * @param passwordForm
+     * @return
+     */
+    Boolean modifyPassword(PasswordForm passwordForm);
+
+    /**
+     * get departments 获取院系信息
+     *
+     * @return
+     */
+    List<Department> getDepartments(Department queryParams, Integer pageSize, Integer pageNum);
+
+    /**
+     * rearrange 重新编排课程
+     *
+     * @param form
+     * @return
+     */
+    Boolean rearrange(ScheduledCourseTable form);
+
+    /**
+     * get profession 获取专业信息
+     *
+     * @param queryParams
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+    List<Profession> getProfessions(Profession queryParams, Integer pageSize, Integer pageNum);
+
+    /**
+     * get clazzs 获取班级信息
+     *
+     * @param queryParams
+     * @param pageSize
+     * @param pageNum
+     * @return
+     */
+    List<Clazz> getClazzs(Clazz queryParams, Integer pageSize, Integer pageNum);
+
+    /**
+     * edit dorm 编辑院系信息
+     *
+     * @param form
+     * @return
+     */
+    ResponseResult editDepartment(EditForm form);
+
+    /**
+     * delete department 删除院系信息
+     *
+     * @param form
+     * @return
+     */
+    Boolean deleteDepartment(DeleteDto form);
+
+    /**
+     * new department 新增院系
+     *
+     * @param newDepartment
+     * @return
+     */
+    Boolean newDepartment(String newDepartment);
+
+    /**
+     * export sample department excel 导出院系excel样例
+     *
+     * @param response
+     */
+    void exportSampleDepartmentExcel(HttpServletResponse response);
+
+    /**
+     * import departments 导入院系信息
+     *
+     * @param file
+     */
+    ResponseResult importDepartments(MultipartFile file);
+
+    /**
+     * new profession 新增专业信息
+     *
+     * @param form
+     * @return
+     */
+    Boolean newProfession(Profession form);
+
+    /**
+     * new clazz 新增班级信息
+     *
+     * @param form
+     * @return
+     */
+    Boolean newClazz(Clazz form);
+
+    /**
+     * delete clazz 删除班级信息
+     *
+     * @param form
+     * @return
+     */
+    Boolean deleteClazz(DeleteDto form);
+
+    /**
+     * delete profession 删除专业信息
+     *
+     * @param form
+     * @return
+     */
+    Boolean deleteProfession(DeleteDto form);
+
+    /**
+     * edit profession 编辑专业信息
+     *
+     * @param form
+     * @return
+     */
+    ResponseResult editProfession(EditForm form);
+
+    /**
+     * edit clazz 编辑班级信息
+     *
+     * @param form
+     * @return
+     */
+    ResponseResult editClazz(EditForm form);
+
+    /**
+     * get all departments 获取全部院系信息
+     *
+     * @return
+     */
+    List<String> getAllDepartments();
+
+    /**
+     * export sample profession excel 导出专业excel样例
+     *
+     * @param response
+     */
+    void exportSampleProfessionExcel(HttpServletResponse response);
+
+    /**
+     * export profession excel 导出专业excel
+     *
+     * @param response
+     */
+    void exportProfessionExcel(HttpServletResponse response);
+
+    /**
+     * import professions 导入专业信息
+     *
+     * @param file
+     * @return ResponseResult
+     */
+    ResponseResult importProfessions(MultipartFile file);
+
+    /**
+     * get all professions 获取全部专业信息
+     *
+     * @return
+     */
+    List<Profession> getAllProfessions();
+
+    /**
+     * export clazz excel 导出班级excel
+     *
+     * @param response
+     */
+    void exportClazzExcel(HttpServletResponse response);
+
+    /**
+     * export sample clazz excel 导出班级excel
+     *
+     * @param response
+     */
+    void exportSampleClazzExcel(HttpServletResponse response);
+
+    /**
+     * 导入班级excel
+     *
+     * @param file
+     * @return
+     */
+    ResponseResult importClazz(MultipartFile file);
+
+    /**
+     * update student total 更新学生人数
+     *
+     * @return
+     */
+    ResponseResult updateStudentTotal();
 }

@@ -3,8 +3,10 @@ package com.plx.admin_system.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.plx.admin_system.entity.ScheduledCourseTable;
 import com.plx.admin_system.entity.Student;
+import com.plx.admin_system.entity.dto.ChangeCourseDto;
 import com.plx.admin_system.entity.dto.InfoDto;
 import com.plx.admin_system.entity.views.SelectedCourse;
+import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.HashMap;
@@ -56,7 +58,7 @@ public interface StudentMapper extends BaseMapper<Student> {
      * @param id
      * @return
      */
-    HashMap getInfo(@Param("id") Integer id);
+    InfoDto getInfo(@Param("id") Integer id);
 
     /**
      * save info 保存信息
@@ -66,4 +68,21 @@ public interface StudentMapper extends BaseMapper<Student> {
      * @return
      */
     Boolean saveInfo(@Param("info") InfoDto info, @Param("id") Integer id);
+
+    /**
+     * modify password 修改密码
+     *
+     * @param id
+     * @param newPassword
+     * @return
+     */
+    Boolean modifyPassword(@Param("id") Integer id, @Param("newPassword") String newPassword);
+
+    /**
+     * get rescheduled courses 查询调课记录
+     *
+     * @return
+     */
+    List<List<ChangeCourseDto>> getRescheduledCourses(@Param("id") Integer id,
+                                                      @Param("week") Integer currentWeek);
 }

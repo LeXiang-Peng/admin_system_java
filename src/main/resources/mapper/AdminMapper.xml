@@ -178,7 +178,22 @@
     </update>
 
     <update id="updateOneTeacher">
-
+        update teacher
+        <set>
+            <if test="editForm.id != null">
+                teacher_id = #{editForm.id},
+            </if>
+            <if test="editForm.name != null and editForm.name != ''">
+                teacher_name = #{editForm.name},
+            </if>
+            <if test="editForm.department != null and editForm.department != ''">
+                department_name = #{editForm.department},
+            </if>
+            <if test="editForm.gender != null and editForm.gender != ''">
+                teacher_gender = #{editForm.gender},
+            </if>
+        </set>
+        where teacher_id = #{teacherId}
     </update>
     <update id="deleteTeachers">
         update teacher
@@ -323,6 +338,97 @@
         </set>
         where admin_id = #{id}
     </update>
+    <update id="modifyPassword">
+        update admin
+        set admin_password = #{newPassword}
+        where admin_id = #{id}
+    </update>
+    <update id="rearrange">
+        update scheduled_course
+        <set>
+            <if test="form.classroomName != null and form.classroomName != ''">
+                classroom_name = #{form.classroomName},
+            </if>
+            <if test="form.buildingName != null and form.classroomName != ''">
+                building_name = #{form.buildingName},
+            </if>
+            <if test="form.weekday != null and form.weekday != ''">
+                weekday = #{form.weekDay},
+            </if>
+            <if test="form.courseTime != null and form.courseTime != ''">
+                course_time = #{form.courseTime},
+            </if>
+        </set>
+        where scheduled_course_id = #{form.scheduledCourseId}
+    </update>
+    <update id="editDepartment">
+        update department
+        <set>
+            <if test="form.department != null and form.department != ''">
+                department_name = #{form.department}
+            </if>
+        </set>
+        where department_id = #{form.id}
+    </update>
+
+    <update id="deleteDepartment">
+        update department
+        set is_existed = false
+        where department_id in
+        <foreach collection="id" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="deleteClazz">
+        update clazz
+        set is_existed = false
+        where clazz_id in
+        <foreach collection="id" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </update>
+    <update id="deleteProfession">
+        update profession
+        set is_existed = false
+        where profession_id in
+        <foreach collection="id" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </update>
+    <update id="editProfession">
+        update profession
+        <set>
+            <if test="form.profession != null and form.profession != ''">
+                profession_name = #{form.profession}
+            </if>
+        </set>
+        where profession_id = #{form.id}
+    </update>
+
+    <update id="editClazz">
+        update clazz
+        <set>
+            <if test="form.clazz != null and form.clazz != ''">
+                clazz_name = #{form.clazz}
+            </if>
+        </set>
+        where clazz_id = #{form.id}
+    </update>
+    <update id="updateStudentTotal">
+        with info as
+                 (
+                     select clazz_id, count(student_id) as total
+                     from clazz
+                              left join student
+                                        on clazz.clazz_name = student.clazz_name
+                     group by clazz_id
+                 )
+        update clazz
+            left join info
+        on clazz.clazz_id = info.clazz_id
+            set student_total = info.total;
+    </update>
 
     <sql id="courseKey">
         <if test="clazz != null and clazz != ''">
@@ -367,6 +473,69 @@
             value (#{task.id}, #{course.course}, #{course.lecturerId}, #{course.lecturer}, #{roomInfo.classroomName},
             #{roomInfo.buildingName}, #{weekDay}, #{courseTime}, #{course.semester}, #{task.weeksTotal},
             #{task.timesOnceAWeek}, #{task.currentTimes}, #{task.totalTimes});
+    </insert>
+
+    <sql id="departmentKey">
+        <if test="newDepartment.departmentId != null">
+            department_id,
+        </if>
+        department_name
+    </sql>
+    <sql id="departmentValue">
+        <if test="newDepartment.departmentId != null">
+            #{newDepartment.departmentId},
+        </if>
+        #{newDepartment.departmentName}
+    </sql>
+    <insert id="newDepartment">
+        insert into department(<include refid="departmentKey"></include>) value (<include
+            refid="departmentValue"></include>)
+    </insert>
+
+    <sql id="professionKey">
+        <if test="form.professionId != null">
+            profession_id,
+        </if>
+        profession_name,
+        department_name
+    </sql>
+    <sql id="professionValue">
+        <if test="form.professionId != null">
+            #{form.professionId},
+        </if>
+        #{form.professionName},
+        #{form.departmentName}
+    </sql>
+
+    <insert id="newProfession">
+        insert into profession(<include refid="professionKey"></include>) value (<include
+            refid="professionValue"></include>)
+    </insert>
+
+    <sql id="clazzKey">
+        <if test="form.clazzId != null">
+            clazz_id,
+        </if>
+        profession_name,
+        department_name,
+        clazz_name,
+        current_semester,
+        academic_year
+    </sql>
+    <sql id="clazzValue">
+        <if test="form.clazzId != null">
+            #{form.clazzId},
+        </if>
+        #{form.professionName},
+        (select department_name from profession where profession_name = #{form.professionName}),
+        #{form.clazzName},
+        #{form.currentSemester},
+        (select academic_year from semester where semester_name = #{form.currentSemester})
+    </sql>
+
+    <insert id="newClazz">
+        insert into clazz(<include refid="clazzKey"></include>) value (<include
+            refid="clazzValue"></include>)
     </insert>
 
 
@@ -642,14 +811,91 @@
         where course_id = #{id}
         group by clazz_name
     </select>
-    <resultMap id="adminInfoMap" type="com.plx.admin_system.entity.dto.InfoDto">
-        <result column="admin_name" property="name" jdbcType="VARCHAR"></result>
-        <result column="admin_phone_number" property="phone" jdbcType="VARCHAR"></result>
-        <result column="admin_email" property="email" jdbcType="VARCHAR"></result>
-    </resultMap>
+
     <select id="getInfo" resultType="com.plx.admin_system.entity.dto.InfoDto">
-        select admin_email as email, admin_phone_number as phone, admin_name as name
+        select admin_email        as email,
+               admin_phone_number as phone,
+               admin_name         as name,
+               avatar_url         as avatar_url
         from admin
         where admin_id = #{id}
+    </select>
+
+    <select id="getDepartments" resultType="com.plx.admin_system.entity.Department">
+        select * from department
+        <where>
+            is_existed = 1
+            <if test="queryParams != null">
+                <if test="queryParams.departmentId != null">
+                    and department_id = #{queryParams.departmentId}
+                </if>
+                <if test="queryParams.departmentName != null and queryParams.departmentName != ''">
+                    and department_name like concat('%',#{queryParams.departmentName},'%')
+                </if>
+            </if>
+        </where>
+        limit #{pageNum}, #{pageSize}
+    </select>
+    <select id="getProfessions" resultType="com.plx.admin_system.entity.Profession">
+        select * from profession
+        left join department
+        on profession.department_name = department.department_name
+        <where>
+            profession.is_existed = 1
+            and department.is_existed = 1
+            <if test="queryParams != null">
+                <if test="queryParams.professionId != null">
+                    and profession_id = #{queryParams.professionId}
+                </if>
+                <if test="queryParams.professionName != null and queryParams.professionName != ''">
+                    and profession_name like concat('%',#{queryParams.professionName},'%')
+                </if>
+                <if test="queryParams.departmentName != null and queryParams.departmentName != ''">
+                    and profession.department_name like concat('%',#{queryParams.departmentName},'%')
+                </if>
+            </if>
+        </where>
+        limit #{pageNum}, #{pageSize}
+    </select>
+    <select id="getClazzList" resultType="com.plx.admin_system.entity.Clazz">
+        select * from clazz
+        left join profession
+        on profession.profession_name =clazz.profession_name
+        left join department
+        on department.department_name = clazz.department_name
+        <where>
+            clazz.is_existed = 1
+            and profession.is_existed = 1
+            and department.is_existed = 1
+            <if test="queryParams != null">
+                <if test="queryParams.clazzId != null">
+                    and clazz_id = #{queryParams.clazzId}
+                </if>
+                <if test="queryParams.clazzName != null and queryParams.clazzName != ''">
+                    and clazz_name like concat('%',#{queryParams.clazzName},'%')
+                </if>
+                <if test="queryParams.professionName != null and queryParams.professionName != ''">
+                    and clazz.profession_name like concat('%',#{queryParams.professionName},'%')
+                </if>
+                <if test="queryParams.departmentName != null and queryParams.departmentName != ''">
+                    and clazz.department_name like concat('%',#{queryParams.departmentName},'%')
+                </if>
+            </if>
+        </where>
+        limit #{pageNum}, #{pageSize}
+    </select>
+    <select id="getAllDepartments" resultType="java.lang.String">
+        select department_name
+        from department
+    </select>
+    <select id="getAllProfessions" resultType="com.plx.admin_system.entity.Profession">
+        select profession_id, profession_name, department_name
+        from profession
+        order by department_name, profession_id asc
+    </select>
+    <select id="getAllClazz" resultType="com.plx.admin_system.entity.Clazz">
+        select clazz_id, clazz_name, profession_name, department_name, current_semester, student_total
+        from clazz
+        order by department_name, clazz_id asc
     </select>
 </mapper>

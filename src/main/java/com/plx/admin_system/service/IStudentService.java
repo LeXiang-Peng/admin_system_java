@@ -3,6 +3,7 @@ package com.plx.admin_system.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.plx.admin_system.entity.Student;
 import com.plx.admin_system.entity.dto.InfoDto;
+import com.plx.admin_system.entity.dto.PasswordForm;
 import com.plx.admin_system.entity.views.SelectedCourse;
 
 import java.util.HashMap;
@@ -52,7 +53,7 @@ public interface IStudentService extends IService<Student> {
      *
      * @return
      */
-    HashMap getInfo();
+    InfoDto getInfo();
 
     /**
      * save info 保存信息
@@ -61,4 +62,12 @@ public interface IStudentService extends IService<Student> {
      * @return
      */
     Boolean saveInfo(InfoDto info);
+
+    /**
+     * modify password 修改密码
+     *
+     * @param passwordForm
+     * @return
+     */
+    Boolean modifyPassword(PasswordForm passwordForm);
 }
