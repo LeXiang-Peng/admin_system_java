@@ -50,6 +50,11 @@ public class Captcha extends AbstractCaptcha {
     public Boolean verifyCode(String code) {
         Boolean result = isUsed ? false : super.verify(code);
         isUsed = true;
+        if (result) {
+            this.visits = 0;
+        } else {
+            this.visits++;
+        }
         return result;
     }
 

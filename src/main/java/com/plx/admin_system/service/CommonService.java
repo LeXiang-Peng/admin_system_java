@@ -7,6 +7,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
@@ -18,19 +19,19 @@ public interface CommonService {
     /**
      * create captcha image 创建一张验证码
      *
+     * @param key
      * @param response
-     * @param sessionId
      */
-    void createCaptchaImage(HttpServletResponse response, String sessionId);
+    void createCaptchaImage(String key, HttpServletResponse response);
 
     /**
      * verify code 验证验证码
      *
+     * @param key
      * @param code
-     * @param sessionId
      * @return Boolean
      */
-    Boolean verifyCode(String code, String sessionId);
+    Boolean verifyCode(String key, String code);
 
     /**
      * log in 登录

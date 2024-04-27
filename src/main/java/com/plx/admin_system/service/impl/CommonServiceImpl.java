@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +53,7 @@ public class CommonServiceImpl implements CommonService {
     private String filePath;
 
     private static final Integer MAP_COUNT = 100;
-    private static final Integer VISISTS_TIMES = 10;
+    private static final Integer VISISTS_TIMES = 5;
     private static final String URL_SUFFIX = "http://47.96.157.155:9090/common/image/";
 
     /**
@@ -64,26 +65,31 @@ public class CommonServiceImpl implements CommonService {
             .build();
 
     @Override
-    public void createCaptchaImage(HttpServletResponse response, String sessionId) {
-        Captcha captcha = (Captcha) map.get(sessionId);
+    public void createCaptchaImage(String key, HttpServletResponse response) {
+        Captcha captcha = (Captcha) map.get(key);
         if (Objects.isNull(captcha)) {
             captcha = new Captcha();
+            map.put(key, captcha);
         }
         Integer visits = captcha.getVisits();
         if (Objects.equals(visits, VISISTS_TIMES)) {
             captcha.reshapeToRandomGenerator();
-        }
-        if (visits <= VISISTS_TIMES) {
-            captcha.setVisits(visits + 1);
-            map.put(sessionId, captcha);
+        } else if (visits <= VISISTS_TIMES) {
+            captcha.reshapeToMathGenerator();
         }
         captcha.createCaptchaImage(response);
     }
 
     @Override
-    public Boolean verifyCode(String code, String sessionId) {
-        Captcha captcha = (Captcha) map.get(sessionId);
-        return Objects.isNull(captcha) ? false : captcha.verifyCode(code);
+    public Boolean verifyCode(String key, String code) {
+        Captcha captcha = (Captcha) map.get(key);
+        if (Objects.isNull(captcha)) {
+            return false;
+        } else {
+            Boolean result = captcha.verifyCode(code);
+            map.put(key, captcha);
+            return result;
+        }
     }
 
     @Override
@@ -98,10 +104,12 @@ public class CommonServiceImpl implements CommonService {
             MyUserDetails loginUser = (MyUserDetails) authenticate.getPrincipal();
             String userId = String.valueOf(loginUser.getUserId());
             String userName = loginUser.getUsername();
+            String url = Objects.isNull(loginUser.getUser().getAvatarUrl()) ? "" : loginUser.getUser().getAvatarUrl();
             String jwt = JwtUtil.createJWT(userId + userName);
             Map<String, String> map = new HashMap();
             map.put("token", jwt);
             map.put("userName", userName);
+            map.put("avatar_url", url);
             //把完整的用户信息存入redis, userId+userName 作为key
             redisCache.setCacheObject(CommonUtils.getRedisUserKey(userId, userName), loginUser);
             return map;

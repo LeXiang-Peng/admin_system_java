@@ -38,17 +38,17 @@
     </update>
 
     <select id="getOneStudentById" resultType="com.plx.admin_system.entity.Student">
-        select student_id, student_name, student_password
+        select student_id, student_name, student_password, avatar_url
         from student
         where student_id = #{id}
     </select>
     <select id="getOneAdminById" resultType="com.plx.admin_system.entity.Admin">
-        select admin_id, admin_name, admin_password, admin_type
+        select admin_id, admin_name, admin_password, admin_type, avatar_url
         from admin
         where admin_id = #{id}
     </select>
     <select id="getOneTeacherById" resultType="com.plx.admin_system.entity.Teacher">
-        select teacher_id, teacher_name, teacher_password, is_authorized
+        select teacher_id, teacher_name, teacher_password, is_authorized, avatar_url
         from teacher
         where teacher_id = #{id}
     </select>

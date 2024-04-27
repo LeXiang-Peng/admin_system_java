@@ -44,6 +44,8 @@ public class Teacher extends User {
     private Byte isAuthorized;
 
     private Byte isExisted;
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
 
     public void setTeacherId(Integer teacherId) {
         super.setUserId(teacherId);
@@ -58,5 +60,11 @@ public class Teacher extends User {
     public void setTeacherName(String teacherName) {
         super.setUserName(teacherName);
         this.teacherName = teacherName;
+    }
+
+    @Override
+    public void setAvatarUrl(String avatarUrl) {
+        super.setAvatarUrl(avatarUrl);
+        this.avatarUrl = avatarUrl;
     }
 }

@@ -30,14 +30,13 @@ public class CommonController {
 
 
     @GetMapping("/captcha")
-    public void getCaptchaImage(HttpServletResponse response, HttpSession session) {
-        commonService.createCaptchaImage(response, session.getId());
+    public void getCaptchaImage(@RequestParam("key") String key, HttpServletResponse response) {
+        commonService.createCaptchaImage(key, response);
     }
 
     @PostMapping("/login")
-    public ResponseResult login(@RequestBody UserDto user, HttpSession session) {
-        //!commonService.verifyCode(user.(), session.getId())
-        if (false) {
+    public ResponseResult login(@RequestParam("key") String key, @RequestBody UserDto user) {
+        if (!commonService.verifyCode(key, user.getCaptcha())) {
             return new ResponseResult(HttpStatus.NO_CONTENT.value(), "验证码错误");
         } else {
             Map map = commonService.login(user);

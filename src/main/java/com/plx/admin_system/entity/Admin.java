@@ -41,6 +41,9 @@ public class Admin extends User {
 
     private Byte adminType;
 
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
+
     public void setAdminId(Integer adminId) {
         super.setUserId(adminId);
         this.adminId = adminId;
@@ -54,5 +57,11 @@ public class Admin extends User {
     public void setAdminName(String adminName) {
         super.setUserName(adminName);
         this.adminName = adminName;
+    }
+
+    @Override
+    public void setAvatarUrl(String avatarUrl) {
+        super.setAvatarUrl(avatarUrl);
+        this.avatarUrl = avatarUrl;
     }
 }

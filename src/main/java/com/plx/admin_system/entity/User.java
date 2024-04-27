@@ -22,4 +22,6 @@ public class User implements Serializable {
     private String userPassword;
     @TableField(exist = false)
     private String userName;
+    @TableField(exist = false)
+    private String avatarUrl;
 }
