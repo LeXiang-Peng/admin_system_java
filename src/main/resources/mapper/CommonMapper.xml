@@ -24,7 +24,7 @@
                 avatar_url = #{url},
             </if>
         </set>
-        where admin_id = #{id} and (avatar_url &lt;&gt; #{url} or avatar_url is null)
+        where student_id = #{id} and (avatar_url &lt;&gt; #{url} or avatar_url is null)
     </update>
 
     <update id="uploadTeacherAvatar">
@@ -34,7 +34,7 @@
                 avatar_url = #{url},
             </if>
         </set>
-        where admin_id = #{id} and (avatar_url &lt;&gt; #{url} or avatar_url is null)
+        where teacher_id = #{id} and (avatar_url &lt;&gt; #{url} or avatar_url is null)
     </update>
 
     <select id="getOneStudentById" resultType="com.plx.admin_system.entity.Student">
